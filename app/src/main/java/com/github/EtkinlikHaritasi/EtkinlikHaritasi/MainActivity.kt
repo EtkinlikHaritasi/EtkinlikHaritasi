@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,7 +52,8 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 
 @Composable
 fun AltMenü(modifier: Modifier = Modifier) {
-    //var selectedItem by remember { mutableIntStateOf(0) }
+    // Yeni öğreniyorum. Buradaki sayfa bilgileri ileride bir hizmete taşınabilir.
+    var selection = remember { mutableIntStateOf(0) }
     val items = listOf("Keşfet", "Bilmiyorum", "Kendim")
     val selectedIcons = listOf(Icons.Filled.Map, Icons.Filled.QuestionMark, Icons.Filled.AccountCircle)
     val unselectedIcons =
@@ -63,13 +65,13 @@ fun AltMenü(modifier: Modifier = Modifier) {
             NavigationBarItem(
                 icon = {
                     Icon(
-                        /*if (selectedItem == index) selectedIcons[index] else*/ unselectedIcons[index],
+                        if (selection.value == index) selectedIcons[index] else unselectedIcons[index],
                         contentDescription = item
                     )
                 },
                 label = { Text(item) },
-                selected = false,//selectedItem == index,
-                onClick = {}//{ selectedItem = index }
+                selected = selection.value == index,
+                onClick = { selection.intValue = index }
             )
         }
     }
