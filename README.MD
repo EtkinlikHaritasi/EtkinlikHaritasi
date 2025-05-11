@@ -25,6 +25,10 @@ proje ödevi olarak geliştirilmektedir.
 
 ## Sürüm Notları
 
+### UI (Compose / SwiftUI)
+
+1. Hafta: Sayfa kavramı oluşturuldu ve sayfalar arası geçiş yapıldı.
+
 ### Sensor (Motion / Location / Environment)
 
 1. Hafta: Gps verisi okuma işlemi bir butona bağlanarak yapıldı.
