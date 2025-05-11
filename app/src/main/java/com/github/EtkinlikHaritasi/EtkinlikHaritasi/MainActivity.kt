@@ -42,6 +42,8 @@ object KeşfetSayfası
 @Serializable
 object RobotSayfası
 @Serializable
+object MikrofonSayfası
+@Serializable
 object KendimSayfası
 
 class MainActivity : ComponentActivity()
@@ -70,6 +72,7 @@ class MainActivity : ComponentActivity()
                     {
                         composable<KeşfetSayfası> { Keşfet().İçerik(Modifier.padding(innerPadding)) }
                         composable<RobotSayfası> { Robot().İçerik(Modifier.padding(innerPadding)) }
+                        composable<MikrofonSayfası> { Mikrofon().İçerik(Modifier.padding(innerPadding)) }
                         composable<KendimSayfası> { Kendim().İçerik(Modifier.padding(innerPadding)) }
                     }
                 }
@@ -136,6 +139,36 @@ fun AltMenü( navController: NavController, modifier: Modifier = Modifier) {
             selected = bu,
             onClick = {
                 navController.navigate(RobotSayfası) {
+                    // Pop up to the start destination of the graph to
+                    // avoid building up a large stack of destinations
+                    // on the back stack as users select items
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    // Avoid multiple copies of the same destination when
+                    // reselecting the same item
+                    launchSingleTop = true
+                    // Restore state when reselecting a previously selected item
+                    restoreState = true
+                }
+            }
+        )
+
+        var mikrofon = Mikrofon()
+        bu = currentDestination?.hierarchy?.any {it.hasRoute(MikrofonSayfası::class)} == true
+        NavigationBarItem(
+            icon = {
+                Icon(
+                    if (!bu) mikrofon.kapalıyken_simge else mikrofon.açıkken_simge,
+                    contentDescription = mikrofon.başlık
+                )
+            },
+            label = {
+                Text(mikrofon.başlık)
+            },
+            selected = bu,
+            onClick = {
+                navController.navigate(MikrofonSayfası) {
                     // Pop up to the start destination of the graph to
                     // avoid building up a large stack of destinations
                     // on the back stack as users select items
