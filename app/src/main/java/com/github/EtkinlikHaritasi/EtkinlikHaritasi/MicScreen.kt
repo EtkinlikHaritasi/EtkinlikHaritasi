@@ -128,7 +128,7 @@ private fun startSpeechToText(activity: Activity, onResult: (String) -> Unit) {
         override fun onBufferReceived(bytes: ByteArray?) {}
         override fun onEndOfSpeech() {}
         override fun onError(i: Int) {
-            onResult("Mikrofon Hatası: $i")
+            onResult("Mikrofon_Hatası: $i")
         }
 
         override fun onResults(bundle: Bundle) {
