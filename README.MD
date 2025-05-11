@@ -10,7 +10,7 @@ proje ödevi olarak geliştirilmektedir.
 
 | Özellik                                                  | Sorumlu             | Dal                       |
 | :------------------------------------------------------- | :------------------ | :------------------------ |
-| Storage / Basic Data                                     | Mehmet Fadıl Boyacı |                           |
+| Storage / Basic Data                                     | Mehmet Fadıl Boyacı | devolop-storage_basicdata |
 | Local Database (Room / CoreData)                         | Rukiye Berna Turan  | develop-local-database    |
 | RESTFul API (CRUD)                                       | Mehmet Fadıl Boyacı |                           |
 | UI (Compose / SwiftUI)                                   | Yusuf Kozan         | develop-ui                |
@@ -24,6 +24,12 @@ proje ödevi olarak geliştirilmektedir.
 ---
 
 ## Sürüm Notları
+
+### Storage / Basic Data
+
+1. Hafta: QR kod tarayıcı özelliği için kamera izin yönetimi eklenmiştir.  
+    Geleneksel `onRequestPermissionsResult` yöntemi kaldırılmış ve yerine Jetpack Compose ile uyumlu
+    `rememberLauncherForActivityResult` API’si kullanılmıştır ve gerekli kütüphaneler eklenmiştir.
 
 ### Local Database (Room / CoreData)
 

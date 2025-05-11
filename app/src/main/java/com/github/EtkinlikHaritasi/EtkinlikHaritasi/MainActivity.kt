@@ -42,6 +42,8 @@ object KeşfetSayfası
 @Serializable
 object RobotSayfası
 @Serializable
+object BiletSayfası
+@Serializable
 object MikrofonSayfası
 @Serializable
 object KendimSayfası
@@ -72,6 +74,7 @@ class MainActivity : ComponentActivity()
                     {
                         composable<KeşfetSayfası> { Keşfet().İçerik(Modifier.padding(innerPadding)) }
                         composable<RobotSayfası> { Robot().İçerik(Modifier.padding(innerPadding)) }
+                        composable<BiletSayfası> {Bilet().İçerik(Modifier.padding(innerPadding))}
                         composable<MikrofonSayfası> { Mikrofon().İçerik(Modifier.padding(innerPadding)) }
                         composable<KendimSayfası> { Kendim().İçerik(Modifier.padding(innerPadding)) }
                     }
@@ -139,6 +142,36 @@ fun AltMenü( navController: NavController, modifier: Modifier = Modifier) {
             selected = bu,
             onClick = {
                 navController.navigate(RobotSayfası) {
+                    // Pop up to the start destination of the graph to
+                    // avoid building up a large stack of destinations
+                    // on the back stack as users select items
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    // Avoid multiple copies of the same destination when
+                    // reselecting the same item
+                    launchSingleTop = true
+                    // Restore state when reselecting a previously selected item
+                    restoreState = true
+                }
+            }
+        )
+
+        var bilet = Bilet()
+        bu = currentDestination?.hierarchy?.any {it.hasRoute(BiletSayfası::class)} == true
+        NavigationBarItem(
+            icon = {
+                Icon(
+                    if (!bu) bilet.kapalıyken_simge else bilet.açıkken_simge,
+                    contentDescription = bilet.başlık
+                )
+            },
+            label = {
+                Text(bilet.başlık)
+            },
+            selected = bu,
+            onClick = {
+                navController.navigate(BiletSayfası) {
                     // Pop up to the start destination of the graph to
                     // avoid building up a large stack of destinations
                     // on the back stack as users select items
