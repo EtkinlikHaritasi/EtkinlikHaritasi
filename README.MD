@@ -11,7 +11,7 @@ proje ödevi olarak geliştirilmektedir.
 | Özellik                                                  | Sorumlu             | Dal                       |
 | :------------------------------------------------------- | :------------------ | :------------------------ |
 | Storage / Basic Data                                     | Mehmet Fadıl Boyacı |                           |
-| Local Database (Room / CoreData)                         | Rukiye Berna Turan  |                           |
+| Local Database (Room / CoreData)                         | Rukiye Berna Turan  | develop-local-database    |
 | RESTFul API (CRUD)                                       | Mehmet Fadıl Boyacı |                           |
 | UI (Compose / SwiftUI)                                   | Yusuf Kozan         | develop-ui                |
 | Background Process / Task                                | Şükrü Fırat Sarp    |                           |
@@ -24,6 +24,16 @@ proje ödevi olarak geliştirilmektedir.
 ---
 
 ## Sürüm Notları
+
+### Local Database (Room / CoreData)
+
+1. Hafta: Projenin local database ihtiyacını karşılamak üzere Room veritabanı çözümü seçildi ve yapı entegre edildi.  
+
+    * User, Event ve Participation olmak üzere üç tabloya ait entity ve DAO iskeletleri oluşturuldu
+    * Bu tablolar ileriki haftalarda kullanılacak ve ilişkili ekranlarla entegre edilecek
+    * Room altyapısı `AppDatabase` ile tanımlandı
+    * Singleton erişim için `AppDatabaseInstance` objesi eklendi  
+    > Room, projede local cache yapısı olarak kullanılacak. Tüm yapı ileride geliştirilecek özellikler için hazırlandı.
 
 ### UI (Compose / SwiftUI)
 
