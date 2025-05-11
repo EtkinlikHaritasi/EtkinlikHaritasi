@@ -45,5 +45,6 @@ proje ödevi olarak geliştirilmektedir.
 
 ### Cloud Service (AI)
 
-1. Hafta: Gelecekte eklenecek yapay zekâlı asistan için konuşma tanıma
-    özelliği yapıldı.
+1. Hafta: Yapay zekâlı asistan için Text-to-Speech desteği eklendi.  
+
+    Gelecek süreçte Gemini Cloud entegrasyonu yapılacak.
