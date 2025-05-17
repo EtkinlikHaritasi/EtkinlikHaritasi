@@ -51,6 +51,8 @@ dependencies {
     implementation(libs.mlkit.barcode.scanning)
     //val room_version = "2.6.1"
     implementation(libs.androidx.room.runtime)
+    implementation(libs.core.ktx)
+    implementation(libs.androidx.junit.ktx)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.core.ktx)
@@ -83,5 +85,6 @@ dependencies {
     //implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
     implementation(libs.android.gms.play.services.location)
+    implementation(kotlin("test"))
 
 }
