@@ -116,7 +116,7 @@ class Keşfet
                 ) == PackageManager.PERMISSION_GRANTED
             )
             {
-                LocationUtils.fetchLocation(context, fusedLocationProviderClient)
+                //LocationUtils.fetchLocation(context, fusedLocationProviderClient)
             }
             else
             {

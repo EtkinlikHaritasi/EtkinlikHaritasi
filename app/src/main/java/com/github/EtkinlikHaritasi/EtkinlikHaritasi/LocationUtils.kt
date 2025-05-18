@@ -42,6 +42,7 @@ object LocationUtils
         }
     }
 
+    /*
     //Önceki konum verisi çeken fonksiyon
     fun fetchLocation(context: Context, fusedLocationProviderClient: FusedLocationProviderClient) {
 
@@ -68,36 +69,30 @@ object LocationUtils
             Log.e("Konum", "lastLocation başarısız: ${it.message}")
         }
     }
+    */
 
     //Yeni konum verisi oluşturan fonksiyon
-    private fun requestNewLocationData(context: Context, fusedLocationProviderClient: FusedLocationProviderClient)
-    {
+    fun startContinuousLocationUpdates(
+        context: Context,
+        fusedLocationProviderClient: FusedLocationProviderClient
+    ) {
         val locationRequest = LocationRequest.Builder(
-            Priority.PRIORITY_HIGH_ACCURACY, // accuracy
-            5000L // intervalMillis
+            Priority.PRIORITY_HIGH_ACCURACY,
+            5000L // 5 saniyede bir konum güncellemesi
         ).apply {
-            setWaitForAccurateLocation(true)
-            setMinUpdateIntervalMillis(2000L)
-            setMaxUpdates(1)
+            setMinUpdateIntervalMillis(5000L) // Minimum 5 saniye arayla
+            //setMaxUpdates(LocationRequest.UNLIMITED)
         }.build()
 
-        val locationCallback = object : LocationCallback()
-        {
-            override fun onLocationResult(locationResult: LocationResult)
-            {
+        val locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
                 val location = locationResult.lastLocation
-                if (location != null)
-                {
-                    Log.d("Konum", "Yeni konum: ${location.latitude}, ${location.longitude}")
-                    Toast.makeText(context, "Yeni: ${location.latitude}, ${location.longitude}", Toast.LENGTH_SHORT).show()
+                if (location != null) {
+                    Log.d("Konum", "Sürekli konum: ${location.latitude}, ${location.longitude}")
+                    Toast.makeText(context, "Sürekli: ${location.latitude}, ${location.longitude}", Toast.LENGTH_SHORT).show()
+                } else {
+                    Log.d("Konum", "Konum alınamadı (null)")
                 }
-                else
-                {
-                    Log.d("Konum", "requestLocationUpdates ile de konum alınamadı")
-                    Toast.makeText(context, "Konum alınamadı", Toast.LENGTH_SHORT).show()
-                }
-
-                fusedLocationProviderClient.removeLocationUpdates(this)
             }
         }
 
@@ -111,6 +106,7 @@ object LocationUtils
             )
         }
     }
+
 
     fun isLocationEnabled(context: Context): Boolean
     {
