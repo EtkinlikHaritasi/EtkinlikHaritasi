@@ -38,9 +38,7 @@ class Keşfet
         val fusedLocationProviderClient = remember {
             LocationUtils.getFusedLocationProviderClient(context)
         }
-
-        var etkinlikler:List<Unit>
-
+        
         Box(
             modifier = modifier
         ) {
