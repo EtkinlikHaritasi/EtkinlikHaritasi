@@ -58,6 +58,8 @@ class MainActivity : ComponentActivity()
 
         LocationUtils.checkLocationPermission(this)
 
+        LocationUtils.startContinuousLocationUpdates(this, fusedLocationProviderClient)
+
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
