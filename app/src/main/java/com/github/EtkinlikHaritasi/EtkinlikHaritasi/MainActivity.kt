@@ -1,6 +1,7 @@
 package com.github.EtkinlikHaritasi.EtkinlikHaritasi
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
@@ -52,9 +53,11 @@ class MainActivity : ComponentActivity()
 {
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
+
     override fun onCreate(savedInstanceState: Bundle?)
     {
         fusedLocationProviderClient = LocationUtils.getFusedLocationProviderClient(this)
+        NFCUtils.initialize(this)
 
         LocationUtils.checkLocationPermission(this)
 
@@ -81,6 +84,25 @@ class MainActivity : ComponentActivity()
                 }
             }
         }
+    }
+
+    override fun onResume()
+    {
+        super.onResume()
+        NFCUtils.enableForegroundDispatch(this)
+    }
+
+    override fun onPause()
+    {
+        super.onPause()
+        NFCUtils.disableForegroundDispatch(this)
+    }
+
+    override fun onNewIntent(intent: Intent)
+    {
+        super.onNewIntent(intent)
+
+        NFCUtils.processNfcIntent(this, intent)
     }
 }
 
