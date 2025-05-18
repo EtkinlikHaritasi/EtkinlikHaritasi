@@ -17,7 +17,7 @@ proje ödevi olarak geliştirilmektedir.
 | Background Process / Task                                | Şükrü Fırat Sarp    |                           |
 | Broadcast Receiver / NSNotificationCenter                | Yusuf Kozan         |                           |
 | Sensor (Motion / Location / Environment)                 | Habil Tataroğulları | develop-sensor            |
-| Connectivity (BLE / Wifi / Cellular Network / USB / NFC) | Habil Tataroğulları |                           |
+| Connectivity (BLE / Wifi / Cellular Network / USB / NFC) | Habil Tataroğulları | develop-connectivity      |
 | Authorization (OAuth / OpenID / JWT)                     | Rukiye Berna Turan  |                           |
 | Cloud Service (AI)                                       | Şükrü Fırat Sarp    | develop-Cloud_Service(AI) |
 
@@ -60,6 +60,10 @@ proje ödevi olarak geliştirilmektedir.
 ### Sensor (Motion / Location / Environment)
 
 1. Hafta: GPS verisi okuma işlemi bir butona bağlanarak yapıldı.
+
+### Connectivity (BLE / Wifi / Cellular Network / USB / NFC)
+
+2. Hafta: NFC kartlarının ID'leri okunup ekrana yazılmaya başlandı.
 
 ### Cloud Service (AI)
 
