@@ -23,6 +23,16 @@ proje ödevi olarak geliştirilmektedir.
 
 ---
 
+## Kurulum Notları
+
+* Google Maps API ile bağlantı sağlanabilmesi için, derlemeden önce kök dizinde `secrets.properties`
+    adlı bir dosya oluşturun. API anahtarınızı dosyaya aşağıdaki şekilde yerleştirin:  
+    ```
+    MAPS_API_KEY=[API ANAHTARINIZ]
+    ```
+
+---
+
 ## Sürüm Notları
 
 ### Storage / Basic Data
