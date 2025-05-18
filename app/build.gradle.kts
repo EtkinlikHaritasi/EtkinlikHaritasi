@@ -104,7 +104,7 @@ dependencies {
     implementation(libs.android.maps.compose.widgets)
 
 
-    implementation(libs.google.firebase.bom)
+    implementation(platform(libs.google.firebase.bom))
     implementation(libs.google.firebase.analytics)
     implementation (libs.squareup.retrofit2.converter.gson)
     implementation (libs.squareup.retrofit2.retrofit)
