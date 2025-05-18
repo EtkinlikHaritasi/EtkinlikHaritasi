@@ -12,7 +12,7 @@ proje ödevi olarak geliştirilmektedir.
 | :------------------------------------------------------- | :------------------ | :------------------------ |
 | Storage / Basic Data                                     | Mehmet Fadıl Boyacı | devolop-storage_basicdata |
 | Local Database (Room / CoreData)                         | Rukiye Berna Turan  | develop-local-database    |
-| RESTFul API (CRUD)                                       | Mehmet Fadıl Boyacı |                           |
+| RESTFul API (CRUD)                                       | Mehmet Fadıl Boyacı | develop-restfulApi        |
 | UI (Compose / SwiftUI)                                   | Yusuf Kozan         | develop-ui                |
 | Background Process / Task                                | Şükrü Fırat Sarp    |                           |
 | Broadcast Receiver / NSNotificationCenter                | Yusuf Kozan         |                           |
@@ -50,6 +50,12 @@ proje ödevi olarak geliştirilmektedir.
     * Room altyapısı `AppDatabase` ile tanımlandı
     * Singleton erişim için `AppDatabaseInstance` objesi eklendi  
     > Room, projede local cache yapısı olarak kullanılacak. Tüm yapı ileride geliştirilecek özellikler için hazırlandı.
+
+### RESTFul API (CRUD)
+
+2. Hafta: Event entity'si için gerekli API işlemleri gerçekleştirildi.
+    API'den veri çekme, ekleme, silme ve güncelleme işlemleri eklendi.
+    Bu işlemleri yöneten fonksiyonlar içeren bir repository sınıfı oluşturuldu.
 
 ### UI (Compose / SwiftUI)
 

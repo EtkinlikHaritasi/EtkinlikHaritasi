@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.secrets.gradle)
     id("com.google.devtools.ksp")
+    id("com.google.gms.google-services")
 
     // Kotlin serialization plugin for type safe routes and navigation arguments
     kotlin("plugin.serialization") version "2.0.21"
@@ -102,4 +103,9 @@ dependencies {
     implementation(libs.android.maps.compose.utils)
     implementation(libs.android.maps.compose.widgets)
 
+
+    implementation(libs.google.firebase.bom)
+    implementation(libs.google.firebase.analytics)
+    implementation (libs.squareup.retrofit2.converter.gson)
+    implementation (libs.squareup.retrofit2.retrofit)
 }
