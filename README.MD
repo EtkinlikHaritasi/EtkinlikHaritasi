@@ -53,7 +53,9 @@ proje ödevi olarak geliştirilmektedir.
 
 ### UI (Compose / SwiftUI)
 
-1. Hafta: Sayfa kavramı oluşturuldu ve sayfalar arası geçiş yapıldı.
+1. Hafta: Sayfa kavramı oluşturuldu ve sayfalar arası geçiş yapıldı.  
+2. Hafta: Google Maps API kullanılarak Keşfet sayfasına harita kondu.  
+    Yakındaki etkinliklerin görüntülenmesi için çekmece eklendi.
 
 ### Sensor (Motion / Location / Environment)
 
