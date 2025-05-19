@@ -11,9 +11,11 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,9 +28,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.R
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.SpeechRecognitionService
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.outlined.Mic
 
 class Mikrofon {
 
@@ -65,8 +64,7 @@ class Mikrofon {
 
         if (!permissionGranted) {
             Column(
-                modifier = modifier
-                    .fillMaxSize(),
+                modifier = modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -90,23 +88,41 @@ class Mikrofon {
     @Composable
     private fun MicScreen(modifier: Modifier = Modifier) {
         val context = LocalContext.current
-        var outputText by remember { mutableStateOf("Mikrofon kapalı") }
-        var micEnabled by remember { mutableStateOf(false) }
+        var speechText by remember { mutableStateOf("Mikrofon Açıldı") }
+        var geminiResponseText by remember { mutableStateOf("") }
 
         val receiver = remember {
             object : BroadcastReceiver() {
                 override fun onReceive(context: Context?, intent: Intent?) {
-                    val result = intent?.getStringExtra("result")
-                    if (!result.isNullOrEmpty()) {
-                        outputText = result
+                    when (intent?.action) {
+                        "SPEECH_RESULT" -> {
+                            val result = intent.getStringExtra("result")
+                            if (!result.isNullOrEmpty()) {
+                                speechText = result
+                            }
+                        }
+                        "GEMINI_RESPONSE" -> {
+                            val response = intent.getStringExtra("response")
+                            if (!response.isNullOrEmpty()) {
+                                geminiResponseText = response
+                            }
+                        }
                     }
                 }
             }
         }
 
         DisposableEffect(Unit) {
-            val filter = IntentFilter("SPEECH_RESULT")
+            val filter = IntentFilter().apply {
+                addAction("SPEECH_RESULT")
+                addAction("GEMINI_RESPONSE")
+            }
+
             context.registerReceiver(receiver, filter)
+
+            val serviceIntent = Intent(context, SpeechRecognitionService::class.java)
+            ContextCompat.startForegroundService(context, serviceIntent)
+
             onDispose {
                 context.unregisterReceiver(receiver)
             }
@@ -130,61 +146,64 @@ class Mikrofon {
                 contentDescription = "Microphone",
                 modifier = Modifier
                     .size(80.dp)
-                    .clickable {
-                        micEnabled = !micEnabled
-                        outputText = if (micEnabled) "Mikrofon Açıldı" else "Mikrofon Kapalı"
-
-                        if (micEnabled) {
-                            val serviceIntent = Intent(context, SpeechRecognitionService::class.java)
-                            ContextCompat.startForegroundService(context, serviceIntent)
-                        } else {
-                            val stopIntent = Intent(context, SpeechRecognitionService::class.java)
-                            context.stopService(stopIntent)
-                        }
-                    }
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = 16.dp)
             )
 
+            // Konuşma sonucu
             Box(
                 modifier = Modifier
                     .padding(vertical = 16.dp)
                     .fillMaxWidth()
                     .background(
-                        color = if (micEnabled) colorResource(id = R.color.white) else colorResource(id = R.color.mic_enabled_color),
+                        color = colorResource(id = R.color.white),
                         shape = CircleShape
                     )
                     .padding(16.dp)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = if (micEnabled) "Algılanan Konuşma:" else "Durum:",
+                        text = "Algılanan Konuşma:",
                         fontSize = 18.sp,
-                        color = if (micEnabled) colorResource(id = R.color.black) else colorResource(id = R.color.white)
+                        color = colorResource(id = R.color.black)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = outputText,
+                        text = speechText,
                         fontSize = 20.sp,
-                        color = if (micEnabled) colorResource(id = R.color.black) else colorResource(id = R.color.white)
+                        color = colorResource(id = R.color.black)
                     )
+                }
+            }
+
+            // Gemini cevabı
+            if (geminiResponseText.isNotBlank()) {
+                Box(
+                    modifier = Modifier
+                        .padding(vertical = 16.dp)
+                        .fillMaxWidth()
+                        .background(
+                            color = colorResource(id = R.color.white),
+                            shape = CircleShape
+                        )
+                        .padding(16.dp)
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Gemini Yanıtı:",
+                            fontSize = 18.sp,
+                            color = colorResource(id = R.color.black)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = geminiResponseText,
+                            fontSize = 20.sp,
+                            color = colorResource(id = R.color.black)
+                        )
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.weight(1f))
-
-            Button(onClick = {
-                micEnabled = !micEnabled
-                outputText = if (micEnabled) "Mikrofon Açıldı" else "Mikrofon Kapalı"
-                if (micEnabled) {
-                    val serviceIntent = Intent(context, SpeechRecognitionService::class.java)
-                    ContextCompat.startForegroundService(context, serviceIntent)
-                } else {
-                    val stopIntent = Intent(context, SpeechRecognitionService::class.java)
-                    context.stopService(stopIntent)
-                }
-            }) {
-                Text(text = if (micEnabled) "Mikrofonu Kapat" else "Mikrofonu Aç")
-            }
         }
     }
 }
