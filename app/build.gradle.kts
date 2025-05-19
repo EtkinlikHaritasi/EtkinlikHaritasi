@@ -66,6 +66,8 @@ dependencies {
     implementation(libs.mlkit.barcode.scanning)
     //val room_version = "2.6.1"
     implementation(libs.androidx.room.runtime)
+    implementation(libs.core.ktx)
+    implementation(libs.androidx.junit.ktx)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.core.ktx)
@@ -102,6 +104,7 @@ dependencies {
     implementation(libs.android.maps.compose)
     implementation(libs.android.maps.compose.utils)
     implementation(libs.android.maps.compose.widgets)
+    implementation(kotlin("test"))
 
 
     implementation(platform(libs.google.firebase.bom))

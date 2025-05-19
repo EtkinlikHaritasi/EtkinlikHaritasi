@@ -49,7 +49,10 @@ proje ödevi olarak geliştirilmektedir.
     * Bu tablolar ileriki haftalarda kullanılacak ve ilişkili ekranlarla entegre edilecek
     * Room altyapısı `AppDatabase` ile tanımlandı
     * Singleton erişim için `AppDatabaseInstance` objesi eklendi  
-    > Room, projede local cache yapısı olarak kullanılacak. Tüm yapı ileride geliştirilecek özellikler için hazırlandı.
+    > Room, projede local cache yapısı olarak kullanılacak. Tüm yapı ileride geliştirilecek özellikler için hazırlandı.  
+
+2. Hafta: Room altyapısının stabil şekilde çalıştığını doğrulamak amacıyla,
+    ViewModel ve Repository entegrasyonundan önce bir Android instrumented test eklendi.
 
 ### RESTFul API (CRUD)
 
