@@ -11,6 +11,7 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import androidx.core.app.NotificationCompat
 import android.util.Log
+import androidx.core.os.bundleOf
 import com.google.ai.client.generativeai.GenerativeModel
 import kotlinx.coroutines.*
 import java.util.Locale
@@ -58,15 +59,12 @@ class SpeechRecognitionService : Service() {
         }
 
         try {
-            if (BuildConfig.GEMINI_API_KEY.isEmpty()) {
-                Log.e(TAG, "Gemini API Anahtarı eksik!")
-            } else {
-                generativeModel = GenerativeModel(
-                    modelName = "gemini-1.5-flash",
-                    apiKey = BuildConfig.GEMINI_API_KEY
-                )
-                Log.i(TAG, "Gemini başarıyla başlatıldı.")
-            }
+            val gemini_key = applicationContext.applicationInfo.metaData.getString("com.github.EtkinlikHaritasi.EtkinlikHaritasi.GEMINI_API_KEY")!!
+            generativeModel = GenerativeModel(
+                modelName = "gemini-1.5-flash",
+                apiKey = gemini_key
+            )
+            Log.i(TAG, "Gemini başarıyla başlatıldı.")
         } catch (e: Exception) {
             Log.e(TAG, "Gemini başlatma hatası: ${e.localizedMessage}")
         }

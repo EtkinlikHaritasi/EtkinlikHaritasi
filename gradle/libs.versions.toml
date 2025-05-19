@@ -25,6 +25,8 @@ firebaseBom = "33.13.0"
 retrofit2 = "2.9.0"
 coreKtxVersion = "1.6.1"
 junitKtx = "1.2.1"
+generativeAI = "0.3.0"
+ktxCoroutines = "1.7.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -69,7 +71,8 @@ google-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", ve
 google-firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 squareup-retrofit2-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit2"}
 squareup-retrofit2-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit2" }
-
+google-ai-client-generativeai = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "generativeAI" }
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "ktxCoroutines" }
 
 
 [plugins]

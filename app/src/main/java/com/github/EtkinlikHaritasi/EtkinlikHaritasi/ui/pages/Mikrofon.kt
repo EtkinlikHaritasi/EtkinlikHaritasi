@@ -118,7 +118,12 @@ class Mikrofon {
                 addAction("GEMINI_RESPONSE")
             }
 
-            context.registerReceiver(receiver, filter)
+            ContextCompat.registerReceiver(
+                context,
+                receiver,
+                filter,
+                ContextCompat.RECEIVER_EXPORTED
+            )
 
             val serviceIntent = Intent(context, SpeechRecognitionService::class.java)
             ContextCompat.startForegroundService(context, serviceIntent)

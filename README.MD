@@ -25,10 +25,12 @@ proje ödevi olarak geliştirilmektedir.
 
 ## Kurulum Notları
 
-* Google Maps API ile bağlantı sağlanabilmesi için, derlemeden önce kök dizinde `secrets.properties`
-    adlı bir dosya oluşturun. API anahtarınızı dosyaya aşağıdaki şekilde yerleştirin:  
+* Google Maps API ve Gemini API ile bağlantı sağlanabilmesi için, derlemeden önce
+    kök dizinde `secrets.properties` adlı bir dosya oluşturun. API anahtarlarınızı
+    dosyaya aşağıdaki şekilde yerleştirin:  
     ```
     MAPS_API_KEY=[API ANAHTARINIZ]
+    GEMINI_API_KEY=[API ANAHTARINIZ]
     ```
 
 ---
@@ -80,3 +82,6 @@ proje ödevi olarak geliştirilmektedir.
 1. Hafta: Yapay zekâlı asistan için Text-to-Speech desteği eklendi.  
 
     Gelecek süreçte Gemini Cloud entegrasyonu yapılacak.
+
+2. Hafta: Gemini entegrasyonuna başlandı.  
+    Arka planda sürekli mikrofon dinlemesi yapılıyor.
