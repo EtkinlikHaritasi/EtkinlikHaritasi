@@ -1,3 +1,4 @@
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -8,6 +9,14 @@ plugins {
 
     // Kotlin serialization plugin for type safe routes and navigation arguments
     kotlin("plugin.serialization") version "2.0.21"
+}
+import java.util.Properties
+import java.io.FileInputStream
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
 }
 
 secrets {
@@ -23,9 +32,11 @@ secrets {
 }
 
 
+
 android {
     namespace = "com.github.EtkinlikHaritasi.EtkinlikHaritasi"
     compileSdk = 35
+
 
     defaultConfig {
         applicationId = "com.github.EtkinlikHaritasi.EtkinlikHaritasi"
@@ -33,6 +44,7 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+        buildConfigField("String", "GEMINI_API_KEY", "\"${localProperties.getProperty("GEMINI_API_KEY") ?: ""}\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -55,6 +67,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -111,4 +124,7 @@ dependencies {
     implementation(libs.google.firebase.analytics)
     implementation (libs.squareup.retrofit2.converter.gson)
     implementation (libs.squareup.retrofit2.retrofit)
+    implementation("com.google.ai.client.generativeai:generativeai:0.3.0") // En son sürümü kontrol edin
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3") // Coroutine'ler için
+
 }
