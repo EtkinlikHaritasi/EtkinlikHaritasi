@@ -1,0 +1,32 @@
+package com.github.EtkinlikHaritasi.EtkinlikHaritasi.remote.api
+
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.User
+import retrofit2.Response
+import retrofit2.http.*
+
+interface UserApi {
+
+    @GET("users")
+    suspend fun getAllUsers(): Response<List<User>>
+
+    @GET("users/{id}")
+    suspend fun getUserById(
+        @Path("id") userId: Int
+    ): Response<User>
+
+    @POST("users")
+    suspend fun createUser(
+        @Body user: User
+    ): Response<User>
+
+    @PUT("users/{id}")
+    suspend fun updateUser(
+        @Path("id") userId: Int,
+        @Body user: User
+    ): Response<User>
+
+    @DELETE("users/{id}")
+    suspend fun deleteUser(
+        @Path("id") userId: Int
+    ): Response<Unit>
+}
