@@ -1,5 +1,6 @@
 package com.github.EtkinlikHaritasi.EtkinlikHaritasi.ui.pages
 
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.NFCUtils
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.annotation.OptIn
@@ -22,7 +23,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import QRCodeScanner
+import android.app.Activity
+import androidx.activity.compose.LocalActivity
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 
 class Bilet
 {
@@ -33,6 +38,23 @@ class Bilet
     @Composable
     fun İçerik(modifier: Modifier)
     {
+        if (LocalActivity.current != null)
+        {
+            var activity = LocalActivity.current as Activity
+            LifecycleEventEffect(Lifecycle.Event.ON_CREATE) {
+                NFCUtils.initialize(activity)
+            }
+
+            LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+                NFCUtils.enableForegroundDispatch(activity)
+            }
+
+            LifecycleEventEffect(Lifecycle.Event.ON_PAUSE) {
+                NFCUtils.disableForegroundDispatch(activity)
+            }
+
+
+        }
         MainScreen(modifier = modifier)
     }
 

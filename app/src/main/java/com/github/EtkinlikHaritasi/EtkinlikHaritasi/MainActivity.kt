@@ -57,7 +57,6 @@ class MainActivity : ComponentActivity()
     override fun onCreate(savedInstanceState: Bundle?)
     {
         fusedLocationProviderClient = LocationUtils.getFusedLocationProviderClient(this)
-        NFCUtils.initialize(this)
 
         LocationUtils.checkLocationPermission(this)
 
@@ -88,17 +87,6 @@ class MainActivity : ComponentActivity()
         }
     }
 
-    override fun onResume()
-    {
-        super.onResume()
-        NFCUtils.enableForegroundDispatch(this)
-    }
-
-    override fun onPause()
-    {
-        super.onPause()
-        NFCUtils.disableForegroundDispatch(this)
-    }
 
     override fun onNewIntent(intent: Intent)
     {
@@ -106,6 +94,7 @@ class MainActivity : ComponentActivity()
 
         NFCUtils.processNfcIntent(this, intent)
     }
+
 }
 
 @Composable
