@@ -2,11 +2,26 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.secrets.gradle)
     id("com.google.devtools.ksp")
+    id("com.google.gms.google-services")
 
     // Kotlin serialization plugin for type safe routes and navigation arguments
     kotlin("plugin.serialization") version "2.0.21"
 }
+
+secrets {
+    // To add your Maps API key to this project:
+    // 1. If the secrets.properties file does not exist, create it in the same folder as the local.properties file.
+    // 2. Add this line, where YOUR_API_KEY is your API key:
+    //        MAPS_API_KEY=YOUR_API_KEY
+    propertiesFileName = "secrets.properties"
+
+    // A properties file containing default secret values. This file can be
+    // checked in version control.
+    defaultPropertiesFileName = "local.defaults.properties"
+}
+
 
 android {
     namespace = "com.github.EtkinlikHaritasi.EtkinlikHaritasi"
@@ -51,8 +66,6 @@ dependencies {
     implementation(libs.mlkit.barcode.scanning)
     //val room_version = "2.6.1"
     implementation(libs.androidx.room.runtime)
-    implementation(libs.core.ktx)
-    implementation(libs.androidx.junit.ktx)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.core.ktx)
@@ -79,12 +92,20 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.fragments)
     implementation(libs.androidx.navigation.test)
+    implementation(libs.androidx.fragment.ktx)
 
     implementation(libs.kotlinx.serialization.json)
     // JSON serialization library, works with the Kotlin serialization plugin
     //implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
     implementation(libs.android.gms.play.services.location)
-    implementation(kotlin("test"))
+    implementation(libs.android.maps.compose)
+    implementation(libs.android.maps.compose.utils)
+    implementation(libs.android.maps.compose.widgets)
 
+
+    implementation(platform(libs.google.firebase.bom))
+    implementation(libs.google.firebase.analytics)
+    implementation (libs.squareup.retrofit2.converter.gson)
+    implementation (libs.squareup.retrofit2.retrofit)
 }
