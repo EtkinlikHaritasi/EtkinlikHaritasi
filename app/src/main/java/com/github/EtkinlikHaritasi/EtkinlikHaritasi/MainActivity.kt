@@ -2,8 +2,11 @@ package com.github.EtkinlikHaritasi.EtkinlikHaritasi
 
 import android.Manifest
 import android.content.Intent
+import android.content.Context
+
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.ui.theme.EtkinlikHaritasiTheme
 import androidx.compose.material3.*
+import java.util.concurrent.TimeUnit
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -33,10 +37,13 @@ import androidx.navigation.compose.rememberNavController
 
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.ui.pages.*
 import kotlinx.serialization.Serializable
+import androidx.work.*
 
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.workers.EventSyncWorker
+
 
 @Serializable
 object KeşfetSayfası
@@ -53,9 +60,23 @@ class MainActivity : ComponentActivity()
 {
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
+    fun scheduleEventWorker(context: Context) {
+        Log.d("EventSyncWorker", "Worker başla")
+        val request = PeriodicWorkRequestBuilder<EventSyncWorker>(
+            15, TimeUnit.MINUTES
+        ).build()
+
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+            "event_sync_worker",
+            ExistingPeriodicWorkPolicy.KEEP, // Eğer varsa tekrar başlatma
+            request
+        )
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
+        scheduleEventWorker(this)
         fusedLocationProviderClient = LocationUtils.getFusedLocationProviderClient(this)
 
         LocationUtils.checkLocationPermission(this)

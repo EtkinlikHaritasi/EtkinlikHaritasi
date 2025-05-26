@@ -86,6 +86,7 @@ dependencies {
     implementation(libs.androidx.material3.icons.extended)
     implementation(libs.androidx.material3.adaptive)
 
+
     testImplementation(libs.junit)
     testImplementation(libs.androidx.room.testing)
     androidTestImplementation(libs.androidx.junit)
@@ -109,7 +110,8 @@ dependencies {
     implementation(libs.android.maps.compose.utils)
     implementation(libs.android.maps.compose.widgets)
     implementation(kotlin("test"))
-
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+    implementation ("com.google.code.gson:gson:2.8.9")
 
     implementation(platform(libs.google.firebase.bom))
     implementation(libs.google.firebase.analytics)
