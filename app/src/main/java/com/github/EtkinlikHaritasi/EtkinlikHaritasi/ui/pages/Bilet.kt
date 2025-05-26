@@ -20,15 +20,22 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import QRCodeScanner
+import android.R
 import android.app.Activity
+import android.content.Context
 import android.text.Layout
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusModifier
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.RectangleShape
@@ -44,10 +51,10 @@ class Bilet
     val kapalıyken_simge = Icons.Outlined.LocalActivity
     val başlık = "Bilet"
 
+
     @ExperimentalGetImage
     @Composable
-    fun İçerik(modifier: Modifier)
-    {
+    fun İçerik(modifier: Modifier) {
         if (LocalActivity.current != null)
         {
             var activity = LocalActivity.current as Activity
@@ -63,106 +70,105 @@ class Bilet
                 NFCUtils.disableForegroundDispatch(activity)
             }
 
-        }
 
-        var context = LocalContext.current
-        var showQrCodeScanner by remember { mutableStateOf(false) }
-        var qrCodeResult by remember { mutableStateOf<String?>(null) }
+            var context = LocalContext.current
+            var QRScannerOn = remember { mutableStateOf(false) }
+            var qrCodeResult by remember { mutableStateOf<String?>(null) }
 
-        Column(modifier = modifier)
-        {
-            Column(modifier = Modifier.fillMaxHeight(0.7f).fillMaxWidth())
+            val permissionLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.RequestPermission()
+            ) {}
+
+            Column(modifier = modifier)
             {
-                if (!showQrCodeScanner)
+
+                Column(modifier = Modifier.fillMaxHeight(0.7f).fillMaxWidth())
                 {
-                    Icon(
-                        Icons.Outlined.Contactless,
-                        "NFC ile bilet okuma",
-                        modifier = Modifier.fillMaxSize(0.5f).align(Alignment.CenterHorizontally)
+                    Box(
+                        modifier = Modifier.fillMaxSize(0.9f).clip(RoundedCornerShape(16.dp))
+                            .align(Alignment.CenterHorizontally)
                     )
-                    Text(
-                        text = "NFC ile bilet kontrolü",
-                        style = Typography.headlineLarge,
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    )
-                }
-                else
-                {
-                    Box(modifier = Modifier.fillMaxSize(0.9f).clip(RoundedCornerShape(5))
-                        .align(Alignment.CenterHorizontally))
                     {
-                        QRCodeScanner { result ->
-                            qrCodeResult = result
+                        if (!QRScannerOn.value)
+                        {
+                            Icon(
+                                Icons.Outlined.Contactless,
+                                "NFC ile bilet okuma",
+                                modifier = Modifier.fillMaxSize(0.7f)
+                                    .align(Alignment.Center)
+                            )
+                        }
+                        else
+                        {
+                            QRCodeScanner { result ->
+                                qrCodeResult = result
+                                Log.d("QR Scanner", result)
+                                Toast.makeText(context, result, Toast.LENGTH_SHORT).show()
+                            }
                         }
                     }
                 }
-            }
-            Box(modifier = Modifier.fillMaxHeight().fillMaxWidth())
-            {
-                FilledTonalButton(
-                    onClick = {},
-                    modifier = Modifier.fillMaxWidth(0.7f).align(Alignment.Center)
-                )
+                Box(modifier = Modifier.fillMaxHeight().fillMaxWidth())
                 {
-                    Icon(
-                        Icons.Outlined.QrCodeScanner,
-                        "QR kod okuyucu",
-                        modifier = Modifier.padding(horizontal = 3.dp, vertical = 1.dp)
-                    )
                     Text(
-                        text = "QR bilet oku",
-                        style = Typography.bodyLarge,
-                        modifier = Modifier
+                        text = if (!QRScannerOn.value) "NFC bilet okunuyor"
+                        else "QR bilet okunuyor",
+                        style = Typography.headlineLarge,
+                        modifier = Modifier.align(Alignment.TopCenter)
                     )
+                    FilledTonalButton(
+                        onClick = {
+                            nfqSwitch(QRScannerOn, activity, context, permissionLauncher)
+                        },
+                        modifier = Modifier.fillMaxWidth(0.7f).align(Alignment.Center)
+                    )
+                    {
+                        Icon(
+                            if (!QRScannerOn.value) Icons.Outlined.QrCodeScanner
+                            else Icons.Outlined.Nfc,
+                            if (!QRScannerOn.value) "QR kod okuyucu"
+                            else "NFC okuyucu",
+                            modifier = Modifier.padding(horizontal = 3.dp, vertical = 1.dp)
+                        )
+                        Text(
+                            text = if (!QRScannerOn.value) "QR bilet oku"
+                            else "NFC bilet oku",
+                            style = Typography.bodyLarge,
+                            modifier = Modifier
+                        )
+                    }
                 }
             }
-            //MainScreen(modifier = modifier)
         }
     }
 
-    @OptIn(ExperimentalGetImage::class)
-    @Composable
-    fun MainScreen(modifier: Modifier = Modifier) {
-        val context = LocalContext.current
-        var showQrCodeScanner by remember { mutableStateOf(false) }
-        var qrCodeResult by remember { mutableStateOf<String?>(null) }
 
-        val permissionLauncher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.RequestPermission()
-        ) { isGranted ->
-            if (isGranted) {
-                showQrCodeScanner = true
-            } else {
+    fun nfqSwitch(QRScannerOn: MutableState<Boolean>, activity: Activity, context: Context,
+                  permissionLauncher: ManagedActivityResultLauncher<String, Boolean>)
+    {
+        if (QRScannerOn.value)
+        {
+            // Bu kısım niyeyse çalışmıyor.
+            NFCUtils.enableForegroundDispatch(activity)
+        }
+        else
+        {
+            val permissionGranted = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.CAMERA
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
+            if (!permissionGranted)
+            {
+                permissionLauncher.launch(Manifest.permission.CAMERA)
+                return
             }
+
+            NFCUtils.disableForegroundDispatch(activity)
         }
 
-        Column(modifier = modifier.padding(16.dp)) {
-            Button(onClick = {
-                val permissionGranted = ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.CAMERA
-                ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        QRScannerOn.value = !QRScannerOn.value
 
-                if (permissionGranted) {
-                    showQrCodeScanner = true
-                } else {
-                    permissionLauncher.launch(Manifest.permission.CAMERA)
-                }
-            }) {
-                Text("QR Kodunu Tarayın")
-            }
-
-            if (showQrCodeScanner) {
-                QRCodeScanner(onQrCodeScanned = { result ->
-                    qrCodeResult = result
-                    showQrCodeScanner = false
-                })
-            }
-
-            qrCodeResult?.let {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Tarama Sonucu: $it")
-            }
-        }
     }
+
 }
