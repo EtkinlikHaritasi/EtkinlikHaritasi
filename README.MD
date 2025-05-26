@@ -60,7 +60,10 @@ proje ödevi olarak geliştirilmektedir.
 
 2. Hafta: Event entity'si için gerekli API işlemleri gerçekleştirildi.
     API'den veri çekme, ekleme, silme ve güncelleme işlemleri eklendi.
-    Bu işlemleri yöneten fonksiyonlar içeren bir repository sınıfı oluşturuldu.
+    Bu işlemleri yöneten fonksiyonlar içeren bir repository sınıfı oluşturuldu.  
+
+3. Hafta: User ve Participatüon entityleri için api işlemleri yapıldı ve bu entityler için
+    repositoryler oluşturuldu. Tüm entitylerin api işlemlerinin ilk versiyonları oluşturuldu sonraki versiyonlarda detaylandırılacak.
 
 ### UI (Compose / SwiftUI)
 
