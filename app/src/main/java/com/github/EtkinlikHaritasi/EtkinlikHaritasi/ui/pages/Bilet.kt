@@ -5,10 +5,7 @@ import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.annotation.OptIn
 import androidx.camera.core.ExperimentalGetImage
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -24,10 +21,22 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import QRCodeScanner
 import android.app.Activity
+import android.text.Layout
 import androidx.activity.compose.LocalActivity
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusModifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.ui.theme.Typography
 
 class Bilet
 {
@@ -35,6 +44,7 @@ class Bilet
     val kapalıyken_simge = Icons.Outlined.LocalActivity
     val başlık = "Bilet"
 
+    @ExperimentalGetImage
     @Composable
     fun İçerik(modifier: Modifier)
     {
@@ -53,9 +63,61 @@ class Bilet
                 NFCUtils.disableForegroundDispatch(activity)
             }
 
-
         }
-        MainScreen(modifier = modifier)
+
+        var context = LocalContext.current
+        var showQrCodeScanner by remember { mutableStateOf(false) }
+        var qrCodeResult by remember { mutableStateOf<String?>(null) }
+
+        Column(modifier = modifier)
+        {
+            Column(modifier = Modifier.fillMaxHeight(0.7f).fillMaxWidth())
+            {
+                if (!showQrCodeScanner)
+                {
+                    Icon(
+                        Icons.Outlined.Contactless,
+                        "NFC ile bilet okuma",
+                        modifier = Modifier.fillMaxSize(0.5f).align(Alignment.CenterHorizontally)
+                    )
+                    Text(
+                        text = "NFC ile bilet kontrolü",
+                        style = Typography.headlineLarge,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                }
+                else
+                {
+                    Box(modifier = Modifier.fillMaxSize(0.9f).clip(RoundedCornerShape(5))
+                        .align(Alignment.CenterHorizontally))
+                    {
+                        QRCodeScanner { result ->
+                            qrCodeResult = result
+                        }
+                    }
+                }
+            }
+            Box(modifier = Modifier.fillMaxHeight().fillMaxWidth())
+            {
+                FilledTonalButton(
+                    onClick = {},
+                    modifier = Modifier.fillMaxWidth(0.7f).align(Alignment.Center)
+                )
+                {
+                    Icon(
+                        Icons.Outlined.QrCodeScanner,
+                        "QR kod okuyucu",
+                        modifier = Modifier.padding(horizontal = 3.dp, vertical = 1.dp)
+                    )
+                    Text(
+                        text = "QR bilet oku",
+                        style = Typography.bodyLarge,
+                        modifier = Modifier
+                    )
+                }
+            }
+            //MainScreen(modifier = modifier)
+        }
     }
 
     @OptIn(ExperimentalGetImage::class)
