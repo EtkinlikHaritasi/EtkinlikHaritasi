@@ -54,7 +54,10 @@ proje ödevi olarak geliştirilmektedir.
     > Room, projede local cache yapısı olarak kullanılacak. Tüm yapı ileride geliştirilecek özellikler için hazırlandı.  
 
 2. Hafta: Room altyapısının stabil şekilde çalıştığını doğrulamak amacıyla,
-    ViewModel ve Repository entegrasyonundan önce bir Android instrumented test eklendi.
+    ViewModel ve Repository entegrasyonundan önce bir Android instrumented test eklendi.  
+
+3. Hafta: Event verileri için EventDao, EventRepository, EventViewModel, EventViewModelFactory
+    sınıfları oluşturuldu.
 
 ### RESTFul API (CRUD)
 
