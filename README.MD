@@ -72,7 +72,9 @@ proje ödevi olarak geliştirilmektedir.
 
 1. Hafta: Sayfa kavramı oluşturuldu ve sayfalar arası geçiş yapıldı.  
 2. Hafta: Google Maps API kullanılarak Keşfet sayfasına harita kondu.  
-    Yakındaki etkinliklerin görüntülenmesi için çekmece eklendi.
+    Yakındaki etkinliklerin görüntülenmesi için çekmece eklendi.  
+
+3. Hafta: Bilet sayfası artık hem NFC hem QR okuma yapabiliyor. Şimdilik biraz kararsız.
 
 ### Sensor (Motion / Location / Environment)
 
