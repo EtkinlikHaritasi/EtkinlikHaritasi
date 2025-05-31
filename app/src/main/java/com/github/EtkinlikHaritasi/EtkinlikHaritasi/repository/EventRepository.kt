@@ -5,6 +5,7 @@ import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.dao.EventDao
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.Event
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.remote.RetrofitInstance
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.remote.api.EventApi
+import retrofit2.Response
 
 class EventRepository(private val eventDao: EventDao){
     private val api = RetrofitInstance.retrofit.create(EventApi::class.java)
@@ -15,16 +16,25 @@ class EventRepository(private val eventDao: EventDao){
     suspend fun refreshEventsFromApi() {
         val response = api.getAllEvents()
         if (response.isSuccessful) {
-            response.body()?.let { events ->
+            response.body()?.values?.toList()?.let { eventsList ->
                 eventDao.clearAll()
-                eventDao.insertAll(events)
+                eventDao.insertAll(eventsList)
             }
         }
     }
 
-    suspend fun getEvents() = api.getAllEvents()
+    suspend fun getEventsMap(): Response<Map<String, Event>> {
+        return api.getAllEvents()
+    }
 
-    suspend fun getEvent(id: Int) = api.getEventById(id)
+    suspend fun getAllEventsList(): List<Event>? {
+        val mapResp = api.getAllEvents()
+        return if (mapResp.isSuccessful) {
+            mapResp.body()?.values?.toList()
+        } else {
+            null
+        }
+    }
 
     suspend fun addEvent(event: Event) = api.createEvent(event)
 
