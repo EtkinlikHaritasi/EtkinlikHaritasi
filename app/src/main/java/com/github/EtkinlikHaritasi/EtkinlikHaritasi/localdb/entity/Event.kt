@@ -9,7 +9,7 @@ data class Event(
     val eventId: Int,
     val title: String,
     val description: String,
-    val location: String,
+ //   val location: List<Double>,
     val date: String,
     val time: String
 )

@@ -66,7 +66,10 @@ proje ödevi olarak geliştirilmektedir.
     Bu işlemleri yöneten fonksiyonlar içeren bir repository sınıfı oluşturuldu.  
 
 3. Hafta: User ve Participatüon entityleri için api işlemleri yapıldı ve bu entityler için
-    repositoryler oluşturuldu. Tüm entitylerin api işlemlerinin ilk versiyonları oluşturuldu sonraki versiyonlarda detaylandırılacak.
+    repositoryler oluşturuldu. Tüm entitylerin api işlemlerinin ilk versiyonları oluşturuldu sonraki versiyonlarda detaylandırılacak.  
+
+4. Hafta: Entity sınıflarında kullanışlılık için değişiklikler yapılmış, giriş yapmayı
+    kolaylaştıracak düzenlemeler eklenmiştir.
 
 ### UI (Compose / SwiftUI)
 

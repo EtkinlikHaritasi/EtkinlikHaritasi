@@ -6,28 +6,28 @@ import retrofit2.http.*
 
 interface ParticipationApi {
 
-    @GET("participations")
+    @GET("participations.json")
     suspend fun getAllParticipations(): Response<List<Participation>>
 
-    @GET("participations/{userId}/{eventId}")
+    @GET("participations/{userId}/{eventId}.json")
     suspend fun getParticipation(
         @Path("userId") userId: Int,
         @Path("eventId") eventId: Int
     ): Response<Participation>
 
-    @POST("participations")
+    @POST("participations.json")
     suspend fun createParticipation(
         @Body participation: Participation
     ): Response<Participation>
 
-    @PUT("participations/{userId}/{eventId}")
+    @PUT("participations/{userId}/{eventId}.json")
     suspend fun updateParticipation(
         @Path("userId") userId: Int,
         @Path("eventId") eventId: Int,
         @Body participation: Participation
     ): Response<Participation>
 
-    @DELETE("participations/{userId}/{eventId}")
+    @DELETE("participations/{userId}/{eventId}.json")
     suspend fun deleteParticipation(
         @Path("userId") userId: Int,
         @Path("eventId") eventId: Int
