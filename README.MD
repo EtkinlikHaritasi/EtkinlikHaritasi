@@ -83,7 +83,9 @@ proje ödevi olarak geliştirilmektedir.
 
 ### Connectivity (BLE / Wifi / Cellular Network / USB / NFC)
 
-2. Hafta: NFC kartlarının ID'leri okunup ekrana yazılmaya başlandı.
+2. Hafta: NFC kartlarının ID'leri okunup ekrana yazılmaya başlandı.  
+
+4. Hafta: Bir noktadan diğer bir noktaya yol tarifi veren API bağlandı.
 
 ### Cloud Service (AI)
 
