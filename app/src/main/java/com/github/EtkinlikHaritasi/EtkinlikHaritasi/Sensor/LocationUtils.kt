@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Location
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -18,6 +19,8 @@ import com.google.android.gms.location.*
 
 object LocationUtils
 {
+    var lastKnownLocation: Location? = null
+
     //FusedLocationProvider oluşturmak için yaptım gerek olmayabilir
     fun getFusedLocationProviderClient(context: Context): FusedLocationProviderClient
     {
@@ -42,35 +45,6 @@ object LocationUtils
         }
     }
 
-    /*
-    //Önceki konum verisi çeken fonksiyon
-    fun fetchLocation(context: Context, fusedLocationProviderClient: FusedLocationProviderClient) {
-
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
-        )
-        {
-            Toast.makeText(context, "İzin yok", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        fusedLocationProviderClient.lastLocation.addOnSuccessListener { location ->
-            if (location != null)
-            {
-                Log.d("Konum", "${location.latitude}, ${location.longitude}")
-                Toast.makeText(context, "${location.latitude} ${location.longitude}", Toast.LENGTH_SHORT).show()
-            }
-            else
-            {
-                Log.d("Konum", "lastLocation null döndü, requestLocationUpdates çağrılıyor...")
-                requestNewLocationData(context, fusedLocationProviderClient)
-            }
-        }.addOnFailureListener {
-            Log.e("Konum", "lastLocation başarısız: ${it.message}")
-        }
-    }
-    */
-
     //Yeni konum verisi oluşturan fonksiyon
     fun startContinuousLocationUpdates(
         context: Context,
@@ -84,13 +58,19 @@ object LocationUtils
             //setMaxUpdates(LocationRequest.UNLIMITED)
         }.build()
 
-        val locationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult) {
+        val locationCallback = object : LocationCallback()
+        {
+            override fun onLocationResult(locationResult: LocationResult)
+            {
                 val location = locationResult.lastLocation
-                if (location != null) {
+                if (location != null)
+                {
+
+                    lastKnownLocation = location;
                     Log.d("Konum", "Sürekli konum: ${location.latitude}, ${location.longitude}")
-                    Toast.makeText(context, "Sürekli: ${location.latitude}, ${location.longitude}", Toast.LENGTH_SHORT).show()
-                } else {
+                }
+                else
+                {
                     Log.d("Konum", "Konum alınamadı (null)")
                 }
             }
@@ -98,7 +78,8 @@ object LocationUtils
 
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
             ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        ) {
+        )
+        {
             fusedLocationProviderClient.requestLocationUpdates(
                 locationRequest,
                 locationCallback,
