@@ -27,10 +27,12 @@ class EventSyncWorker(
     }
 
     override suspend fun doWork(): Result {
+        Log.i("EventSyncWorker", "do working")
         return try {
             val response = repository.getEvents()
             if (response.isSuccessful) {
                 val events = response.body()
+                Log.e("EventSyncWorker", events.toString())
                 if (events != null) {
                     val newIds = events.map { it.eventId }.toSet()
                     val diffCount = (newIds - lastIds).size

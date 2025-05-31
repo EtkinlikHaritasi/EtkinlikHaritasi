@@ -6,7 +6,7 @@ import retrofit2.http.*
 
 interface EventApi {
 
-    @GET("events")
+    @GET("events.json")
     suspend fun getAllEvents(): Response<List<Event>>
 
     @GET("events/{id}")
