@@ -15,7 +15,7 @@ object DirectionApi
             val client = OkHttpClient()
 
             val url = "https://maps.googleapis.com/maps/api/directions/json?" +
-                    "origin=${origin.latitude},${origin.longitude}" +
+                    "origin=${origin!!.latitude},${origin.longitude}" +
                     "&destination=${destination.latitude},${destination.longitude}" +
                     "&key=$apiKey"
 
