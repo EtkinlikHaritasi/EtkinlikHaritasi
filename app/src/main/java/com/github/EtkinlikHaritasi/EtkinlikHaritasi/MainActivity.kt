@@ -8,6 +8,8 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.OptIn
+import androidx.camera.core.ExperimentalGetImage
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -48,12 +50,16 @@ object BiletSayfası
 object MikrofonSayfası
 @Serializable
 object KendimSayfası
+@Serializable
+object JWTTestEkrani
+
 
 class MainActivity : ComponentActivity()
 {
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
 
+    @OptIn(ExperimentalGetImage::class)
     override fun onCreate(savedInstanceState: Bundle?)
     {
         fusedLocationProviderClient = LocationUtils.getFusedLocationProviderClient(this)
@@ -74,13 +80,16 @@ class MainActivity : ComponentActivity()
                         AltMenü(navController)
                     }
                 ) { innerPadding ->
-                    NavHost(navController = navController, startDestination = KeşfetSayfası)
+                    NavHost(navController = navController, startDestination = JWTTestEkrani)
                     {
                         composable<KeşfetSayfası> { Keşfet().İçerik(Modifier.padding(innerPadding)) }
                         composable<RobotSayfası> { Robot().İçerik(Modifier.padding(innerPadding)) }
                         composable<BiletSayfası> {Bilet().İçerik(Modifier.padding(innerPadding))}
                         composable<MikrofonSayfası> { Mikrofon().İçerik(Modifier.padding(innerPadding)) }
                         composable<KendimSayfası> { Kendim().İçerik(Modifier.padding(innerPadding)) }
+                        composable<JWTTestEkrani> { TestLoginScreen(navController) }
+
+
                     }
                 }
             }
