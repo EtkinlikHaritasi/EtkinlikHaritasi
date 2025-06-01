@@ -62,16 +62,21 @@ class MainActivity : ComponentActivity()
 
     fun scheduleEventWorker(context: Context) {
         Log.d("EventSyncWorker", "Worker başla")
-        val request = PeriodicWorkRequestBuilder<EventSyncWorker>(
+
+        val oneTimeRequest = OneTimeWorkRequestBuilder<EventSyncWorker>().build()
+        WorkManager.getInstance(context).enqueue(oneTimeRequest)
+
+        val periodicRequest = PeriodicWorkRequestBuilder<EventSyncWorker>(
             15, TimeUnit.MINUTES
         ).build()
 
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             "event_sync_worker",
-            ExistingPeriodicWorkPolicy.KEEP, // Eğer varsa tekrar başlatma
-            request
+            ExistingPeriodicWorkPolicy.KEEP,
+            periodicRequest
         )
     }
+
 
 
     override fun onCreate(savedInstanceState: Bundle?)

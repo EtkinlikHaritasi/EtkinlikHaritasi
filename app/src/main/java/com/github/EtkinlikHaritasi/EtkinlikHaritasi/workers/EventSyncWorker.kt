@@ -10,6 +10,8 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.EventRepository
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.database.AppDatabaseInstance
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class EventSyncWorker(
     context: Context,
@@ -27,36 +29,47 @@ class EventSyncWorker(
     }
 
     override suspend fun doWork(): Result {
-        Log.i("EventSyncWorker", "do working")
         return try {
-            val response = repository.getEvents()
-            if (response.isSuccessful) {
-                val events = response.body()
-                Log.e("EventSyncWorker", events.toString())
-                if (events != null) {
-                    val newIds = events.map { it.eventId }.toSet()
-                    val diffCount = (newIds - lastIds).size
-                    lastIds = newIds
-
-                    val message = if (diffCount > 0) {
-                        "$diffCount yeni etkinlik bulundu"
-                    } else {
-                        "Etkinliklerde değişiklik yok"
-                    }
-                    showNotification(message)
-                    Result.success()
-                } else {
-                    showNotification("Etkinlik bilgileri alınamadı (boş veri)")
-                    Result.retry()
-                }
-            } else {
-                showNotification("Etkinlik bilgileri alınamadı (hata: ${response.code()})")
-                Result.retry()
+            val events = repository.getAllEventsList()
+            if (events == null) {
+                showNotification("Etkinlik bilgileri alınamadı (boş veri)")
+                return Result.retry()
             }
+
+            val newIds = events.map { it.eventId }.toSet()
+            val diffCount = (newIds - lastIds).size
+            lastIds = newIds
+
+            if (diffCount > 0) {
+                showNotification("$diffCount yeni etkinlik bulundu")
+            }
+
+            val now = System.currentTimeMillis()
+            val oneHourMillis = 3600 * 1000L
+
+            val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+
+            events.forEach { event ->
+                try {
+                    val eventDateTimeStr = "${event.date} ${event.time}" // "2025-06-01 14:00"
+                    val eventTimeMillis = formatter.parse(eventDateTimeStr)?.time ?: return@forEach
+
+                    val diff = eventTimeMillis - now
+                    if (diff in 0 until oneHourMillis) {
+                        showNotification("${event.title}   ${diff / 60000} dk kaldı.")
+                    }
+                } catch (e: Exception) {
+                    Log.e("EventSyncWorker", "Etkinlik zamanı parse edilemedi: ${event.title}", e)
+                }
+            }
+
+
+
+            Result.success()
         } catch (e: Exception) {
             Log.e("EventSyncWorker", "Exception in doWork", e)
             showNotification("Etkinlik bilgileri alınamadı")
-            Result.retry()
+            return Result.retry()
         }
     }
 

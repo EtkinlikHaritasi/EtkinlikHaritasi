@@ -13,7 +13,9 @@ import android.util.Log
 import com.google.ai.client.generativeai.GenerativeModel
 import kotlinx.coroutines.*
 import java.util.*
-
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.EventRepository
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.database.AppDatabase
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.database.AppDatabaseInstance
 class SpeechRecognitionService : Service() {
 
     companion object {
@@ -44,11 +46,17 @@ class SpeechRecognitionService : Service() {
             }
         }
     }
+    private fun getEventRepository(): EventRepository {
+        val eventDao = AppDatabaseInstance.getDatabase(applicationContext).eventDao()
+        return EventRepository(eventDao)
+    }
+
+
+
+
 
     override fun onCreate() {
         super.onCreate()
-        createNotificationChannel()
-        startForeground(NOTIFICATION_ID, createNotification())
 
         if (!SpeechRecognizer.isRecognitionAvailable(this)) {
             Log.e(TAG, "SpeechRecognizer desteklenmiyor, servisi durduruyorum.")
@@ -129,23 +137,32 @@ class SpeechRecognitionService : Service() {
     }
 
     private fun checkKeywordsAndProcessWithGemini(text: String) {
-        val prompt = """
-            Kullanıcı şöyle dedi:
-            önce şöyle dedi "$prevcommand" en sonda şöyle dedi "$text"
-            kullanıcıya etkinlikler veya aktiviteler öner dost canlısı olacak şekilde diyalog kuararmısın .
-        """.trimIndent()
-        prevcommand = text
+        val repository = getEventRepository()
         serviceScope.launch {
+            val events = repository.getAllEventsList()
+
+            val eventTitles = events?.joinToString("\n") { it.title } ?: "Etkinlik bulunamadı."
+            Log.d(TAG,  eventTitles)
+            val prompt = """
+            Kullanıcı şöyle dedi: "$text"
+            kullanıcıya etkinlikler veya aktiviteler öner  kısaca diyalog kurarmısın.
+            İşte mevcut etkinlikler: ve zamanları 
+            $eventTitles
+        """.trimIndent()
+
+            prevcommand = text
             Log.d(TAG, "Gemini isteği gönderiliyor...")
+
             val reply = geminiIleCevapUret(prompt)
             if (!reply.isNullOrBlank()) {
                 sendBroadcast(Intent("GEMINI_RESPONSE").putExtra("response", reply))
                 sendBroadcast(Intent("OUTPUT_TEXT").putExtra("output", reply))
             } else {
-                Log.w(TAG, " Gemini cevabı alınamadı.")
+                Log.w(TAG, "Gemini cevabı alınamadı.")
             }
         }
     }
+
 
     private fun metindeAnahtarKelimeVarMi(text: String): Boolean {
         val lower = text.lowercase(Locale.getDefault())
@@ -173,19 +190,9 @@ class SpeechRecognitionService : Service() {
         }
     }
 
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(CHANNEL_ID, "Speech Recognition", NotificationManager.IMPORTANCE_LOW)
-            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(channel)
-        }
-    }
 
-    private fun createNotification() = NotificationCompat.Builder(this, CHANNEL_ID)
-        .setContentTitle("Mikrofon Bekliyor")
-        .setContentText("Butona bastığınızda dinlemeye başlayacak")
-        .setSmallIcon(R.drawable.mic)
-        .setOngoing(true)
-        .build()
+
+
 
     private fun getErrorText(code: Int): String = when (code) {
         SpeechRecognizer.ERROR_AUDIO -> "Ses problemi"

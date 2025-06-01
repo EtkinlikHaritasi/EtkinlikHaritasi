@@ -127,7 +127,8 @@ class Mikrofon {
             )
 
             val serviceIntent = Intent(context, SpeechRecognitionService::class.java)
-            ContextCompat.startForegroundService(context, serviceIntent)
+            context.startService(serviceIntent)
+
 
             onDispose {
                 context.unregisterReceiver(receiver)
