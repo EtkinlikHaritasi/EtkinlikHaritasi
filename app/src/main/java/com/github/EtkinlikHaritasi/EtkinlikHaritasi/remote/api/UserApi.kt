@@ -23,7 +23,7 @@ interface UserApi {
         @POST("users")
     suspend fun createUser(
         @Body user: User,
-        @Query("auth") token: String
+        //@Query("auth") token: String
     ): Response<User>
 
     @PUT("users/{id}")

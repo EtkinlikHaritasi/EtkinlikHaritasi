@@ -23,7 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -59,7 +59,8 @@ class MainActivity : ComponentActivity()
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
 
-    @OptIn(ExperimentalGetImage::class)
+    @ExperimentalMaterial3Api
+    @ExperimentalGetImage
     override fun onCreate(savedInstanceState: Bundle?)
     {
         fusedLocationProviderClient = LocationUtils.getFusedLocationProviderClient(this)
@@ -68,29 +69,38 @@ class MainActivity : ComponentActivity()
 
         LocationUtils.startContinuousLocationUpdates(this, fusedLocationProviderClient)
 
+
+
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             EtkinlikHaritasiTheme {
-                val navController = rememberNavController()
+                var girişYaptı = remember { mutableStateOf(false) }
 
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    bottomBar = {
-                        AltMenü(navController)
+                if (girişYaptı.value)
+                {
+                    val navController = rememberNavController()
+
+                    Scaffold(
+                        modifier = Modifier.fillMaxSize(),
+                        bottomBar = {
+                            AltMenü(navController)
+                        }
+                    ) { innerPadding ->
+                        NavHost(navController = navController, startDestination = KeşfetSayfası)
+                        {
+                            composable<KeşfetSayfası> { Keşfet().İçerik(Modifier.padding(innerPadding)) }
+                            composable<RobotSayfası> { Robot().İçerik(Modifier.padding(innerPadding)) }
+                            composable<BiletSayfası> { Bilet().İçerik(Modifier.padding(innerPadding)) }
+                            composable<MikrofonSayfası> { Mikrofon().İçerik(Modifier.padding(innerPadding)) }
+                            composable<KendimSayfası> { Kendim().İçerik(Modifier.padding(innerPadding)) }
+                            //composable<JWTTestEkrani> { TestLoginScreen(navController) }
+                        }
                     }
-                ) { innerPadding ->
-                    NavHost(navController = navController, startDestination = JWTTestEkrani)
-                    {
-                        composable<KeşfetSayfası> { Keşfet().İçerik(Modifier.padding(innerPadding)) }
-                        composable<RobotSayfası> { Robot().İçerik(Modifier.padding(innerPadding)) }
-                        composable<BiletSayfası> {Bilet().İçerik(Modifier.padding(innerPadding))}
-                        composable<MikrofonSayfası> { Mikrofon().İçerik(Modifier.padding(innerPadding)) }
-                        composable<KendimSayfası> { Kendim().İçerik(Modifier.padding(innerPadding)) }
-                        composable<JWTTestEkrani> { TestLoginScreen(navController) }
-
-
-                    }
+                }
+                else
+                {
+                    GirişKayıt().İçerik(girişYaptı)
                 }
             }
         }
