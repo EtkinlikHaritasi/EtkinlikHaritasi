@@ -183,7 +183,7 @@ class SpeechRecognitionService : Service() {
         Handler(Looper.getMainLooper()).post {
             try {
                 speechRecognizer.startListening(speechIntent)
-                Log.d(TAG, "🎧 Dinleme başlatıldı.")
+                Log.d(TAG, " Dinleme başlatıldı.")
             } catch (e: Exception) {
                 Log.e(TAG, "Dinleme hatası: ${e.message}")
             }
