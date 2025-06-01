@@ -75,6 +75,8 @@ class Keşfet
         var locationGotClicked = remember { mutableStateOf(false) }
         var clickedLocation = remember { mutableStateOf(focus_location) }
         var events = remember { mutableStateOf<List<Event>?>(null) }
+        var eventInfoDialogOpen = remember { mutableStateOf(false) }
+        var clickedEvent = remember { mutableStateOf<Event?>(null) }
 
         val scope = rememberCoroutineScope()
         val snackbarHostState = remember { SnackbarHostState() }
@@ -170,7 +172,12 @@ class Keşfet
                                 tag = x.eventId,
                                 title = x.title,
                                 snippet = x.description,
-                                draggable = false
+                                draggable = false,
+                                onClick = { marker ->
+                                    eventInfoDialogOpen.value = true
+                                    clickedEvent.value = x
+                                    true
+                                }
                             )
                         }
                     }
@@ -184,6 +191,11 @@ class Keşfet
                     )*/
                 }
 
+                if (eventInfoDialogOpen.value && clickedEvent.value != null)
+                {
+                    EtkinlikBilgisi(clickedEvent.value!!, eventInfoDialogOpen)
+                }
+
                 if (locationGotClicked.value)
                 {
                     YeniEtkinlikOluşturucu(clickedLocation.value, locationGotClicked, db, scope)
@@ -193,6 +205,66 @@ class Keşfet
 
         }
 
+    }
+
+    @Composable
+    fun EtkinlikBilgisi(event: Event, eventInfoDialogOpen: MutableState<Boolean>)
+    {
+        var date = DateTimeStrings.yMd_toCalendar(event.date, "-")!!
+        val Hm = event.time.split(":")
+        date.set(Calendar.HOUR_OF_DAY, Hm[0].toInt())
+        date.set(Calendar.MINUTE, Hm[1].toInt())
+        AlertDialog(
+            icon = {
+                Icon(
+                    Icons.Filled.Event,
+                    contentDescription = "Etkinlik"
+                )
+            },
+            title = {
+                Text(event.title)
+            },
+            text = {
+                Column()
+                {
+                    Text(event.description)
+                    OutlinedTextField(
+                        value = DateTimeStrings.dMyHms(date, ".", ".", " "),
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Tarih") }
+                    )
+                }
+            },
+            onDismissRequest = {
+                eventInfoDialogOpen.value = false
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        eventInfoDialogOpen.value = false
+                    }
+                ) {
+                    Text(text = "Vazgeç")
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        /*
+                            Buraya etkinliğe katılma özelliği gelecek
+                         */
+                        eventInfoDialogOpen.value = false
+                    }
+                ) {
+                    Text(text = "Katıl")
+                }
+            },
+            properties = DialogProperties(
+                dismissOnClickOutside = false,
+                dismissOnBackPress = true
+            )
+        )
     }
 
     @ExperimentalMaterial3Api
@@ -243,9 +315,7 @@ class Keşfet
                             value = "${konum.latitude}",
                             onValueChange = {},
                             label = {
-                                Text(
-                                    text = "Enlem"
-                                )
+                                Text(text = "Enlem")
                             },
                             readOnly = true,
                             enabled = false
@@ -254,9 +324,7 @@ class Keşfet
                             value = "${konum.longitude}",
                             onValueChange = {},
                             label = {
-                                Text(
-                                    text = "Boylam"
-                                )
+                                Text(text = "Boylam")
                             },
                             readOnly = true,
                             enabled = false
@@ -267,9 +335,7 @@ class Keşfet
                                 ad.value = it
                             },
                             label = {
-                                Text(
-                                    text = "Etkinlik Adı"
-                                )
+                                Text(text = "Etkinlik Adı")
                             },
                             singleLine = true
                         )
@@ -279,9 +345,7 @@ class Keşfet
                                 açıklama.value = it
                             },
                             label = {
-                                Text(
-                                    text = "Açıklama"
-                                )
+                                Text(text = "Açıklama")
                             },
                             maxLines = 5
                         )
@@ -293,9 +357,7 @@ class Keşfet
                             else "",
                             onValueChange = {},
                             label = {
-                                Text(
-                                    text = "Tarih"
-                                )
+                                Text(text = "Tarih")
                             },
                             readOnly = true,
                             modifier = Modifier.pointerInput(seçilen_tarih.value) {
@@ -317,9 +379,7 @@ class Keşfet
                             else "",
                             onValueChange = {},
                             label = {
-                                Text(
-                                    text = "Saat"
-                                )
+                                Text(text = "Saat")
                             },
                             readOnly = true,
                             modifier = Modifier.pointerInput(
@@ -385,9 +445,7 @@ class Keşfet
                                 locationGotClicked.value = false
                             }
                         ) {
-                            Text(
-                                text = "Vazgeç"
-                            )
+                            Text(text = "Vazgeç")
                         }
 
                         TextButton(
@@ -415,9 +473,7 @@ class Keşfet
                                 locationGotClicked.value = false
                             }
                         ) {
-                            Text(
-                                text = "Oluştur"
-                            )
+                            Text(text = "Oluştur")
                         }
                     }
                 }
@@ -467,18 +523,14 @@ class Keşfet
                 TextButton(
                     onClick = onDismiss
                 ) {
-                    Text(
-                        text = "Vazgeç"
-                    )
+                    Text(text = "Vazgeç")
                 }
             },
             confirmButton = {
                 TextButton(
                     onClick = onConfirm
                 ) {
-                    Text(
-                        text = "Saati Seç"
-                    )
+                    Text(text = "Saati Seç")
                 }
             },
             text = {
