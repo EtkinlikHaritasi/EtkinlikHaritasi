@@ -7,26 +7,37 @@ import retrofit2.http.*
 interface UserApi {
 
     @GET("users.json")
-    suspend fun getAllUsers(): Response<Map<String, User>>
+    //suspend fun getAllUsers(): Response<List<User>>
+    suspend fun getAllUsers(@Query("auth") token: String): Response<List<User>>
 
+//    @GET("users/{id}")
+//    suspend fun getUserById(
+//        @Path("id") userId: Int
+//    ): Response<User>
     @GET("users/{id}.json")
     suspend fun getUserById(
-        @Path("id") userId: Int
+        @Path("id") userId: Int,
+        @Query("auth") token: String
     ): Response<User>
 
-    @POST("users.json")
+        @POST("users")
     suspend fun createUser(
-        @Body user: User
+        @Body user: User,
+        @Query("auth") token: String
     ): Response<User>
 
-    @PUT("users/{id}.json")
+    @PUT("users/{id}")
     suspend fun updateUser(
         @Path("id") userId: Int,
-        @Body user: User
+        @Body user: User,
+        @Query("auth") token: String
     ): Response<User>
 
-    @DELETE("users/{id}.json")
+    @DELETE("users/{id}")
     suspend fun deleteUser(
-        @Path("id") userId: Int
+        @Path("id") userId: Int,
+        @Query("auth") token: String
     ): Response<Unit>
 }
+
+

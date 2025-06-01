@@ -18,7 +18,7 @@ proje ödevi olarak geliştirilmektedir.
 | Broadcast Receiver / NSNotificationCenter                | Yusuf Kozan         |                           |
 | Sensor (Motion / Location / Environment)                 | Habil Tataroğulları | develop-sensor            |
 | Connectivity (BLE / Wifi / Cellular Network / USB / NFC) | Habil Tataroğulları | develop-connectivity      |
-| Authorization (OAuth / OpenID / JWT)                     | Rukiye Berna Turan  |                           |
+| Authorization (OAuth / OpenID / JWT)                     | Rukiye Berna Turan  | develop-auth              |
 | Cloud Service (AI)                                       | Şükrü Fırat Sarp    | develop-Cloud_Service(AI) |
 
 ---
@@ -92,6 +92,11 @@ proje ödevi olarak geliştirilmektedir.
 2. Hafta: NFC kartlarının ID'leri okunup ekrana yazılmaya başlandı.  
 
 4. Hafta: Bir noktadan diğer bir noktaya yol tarifi veren API bağlandı.
+
+### Authorization (OAuth / OpenID / JWT)
+
+4. Hafta: Firebase Authentication ile kullanıcı girişi entegre edildi.  
+    Giriş yapılan kullanıcıdan JWT token alınıp uygulama içinde kullanılacak şekilde yapılandırıldı.
 
 ### Cloud Service (AI)
 
