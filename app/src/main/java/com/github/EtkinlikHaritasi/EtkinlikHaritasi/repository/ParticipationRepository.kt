@@ -1,7 +1,7 @@
 package com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository
 
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.Participation
-import com.github.EtkinlikHaritasi.EtkinlikHaritasi.remote.RetrofitInstance
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.remote.auth.RetrofitInstance
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.remote.api.ParticipationApi
 
 class ParticipationRepository {
