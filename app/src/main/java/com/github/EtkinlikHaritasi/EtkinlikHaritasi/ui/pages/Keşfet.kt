@@ -83,7 +83,7 @@ class Keşfet
 
         LifecycleEventEffect(Lifecycle.Event.ON_START) {
             scope.launch {
-                EventRepository(db.eventDao()).refreshEventsFromApi()
+                //EventRepository(db.eventDao()).refreshEventsFromApi()
             }
         }
 
@@ -155,7 +155,7 @@ class Keşfet
                     },
                     onMapLoaded = {
                         scope.launch {
-                            events.value = EventRepository(db.eventDao()).getAllEventsList()
+                            //events.value = EventRepository(db.eventDao()).getAllEventsList()
                         }
                     }
                 )
@@ -408,7 +408,7 @@ class Keşfet
                                         )
 
                                         scope.launch {
-                                            var a = EventRepository(db.eventDao()).addEvent(yeni_etkinlik)
+                                            //var a = EventRepository(db.eventDao()).addEvent(yeni_etkinlik)
                                         }
                                     }
                                 }

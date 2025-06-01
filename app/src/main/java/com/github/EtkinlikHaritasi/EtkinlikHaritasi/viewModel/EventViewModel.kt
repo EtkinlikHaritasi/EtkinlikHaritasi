@@ -13,7 +13,7 @@ class EventViewModel(
 
     val allEvents: LiveData<List<Event>> = repository.allEvents
 
-    fun refreshEvents() = viewModelScope.launch {
-        repository.refreshEventsFromApi()
+    fun refreshEvents(token: String) = viewModelScope.launch {
+        repository.refreshEventsFromApi(token)
     }
 }
