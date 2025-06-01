@@ -10,5 +10,8 @@ data class User(
     val firstName: String,
     val lastName: String,
     val age: Int,
-    val email: String
+    val email: String,
+    val password: String,
+//    val joinedEvents: List<Event>,   //daha önceden katıldığı etkinlikler
+ //   val notJoinedEvents: List<Event>  //daha önceden katıldığı ama henüz gerçekleştirilmemiş etkinlikler
 )

@@ -66,7 +66,10 @@ proje ödevi olarak geliştirilmektedir.
     Bu işlemleri yöneten fonksiyonlar içeren bir repository sınıfı oluşturuldu.  
 
 3. Hafta: User ve Participatüon entityleri için api işlemleri yapıldı ve bu entityler için
-    repositoryler oluşturuldu. Tüm entitylerin api işlemlerinin ilk versiyonları oluşturuldu sonraki versiyonlarda detaylandırılacak.
+    repositoryler oluşturuldu. Tüm entitylerin api işlemlerinin ilk versiyonları oluşturuldu sonraki versiyonlarda detaylandırılacak.  
+
+4. Hafta: Entity sınıflarında kullanışlılık için değişiklikler yapılmış, giriş yapmayı
+    kolaylaştıracak düzenlemeler eklenmiştir.
 
 ### UI (Compose / SwiftUI)
 
@@ -83,7 +86,9 @@ proje ödevi olarak geliştirilmektedir.
 
 ### Connectivity (BLE / Wifi / Cellular Network / USB / NFC)
 
-2. Hafta: NFC kartlarının ID'leri okunup ekrana yazılmaya başlandı.
+2. Hafta: NFC kartlarının ID'leri okunup ekrana yazılmaya başlandı.  
+
+4. Hafta: Bir noktadan diğer bir noktaya yol tarifi veren API bağlandı.
 
 ### Cloud Service (AI)
 
