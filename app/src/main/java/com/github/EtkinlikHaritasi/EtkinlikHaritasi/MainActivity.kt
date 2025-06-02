@@ -1,5 +1,6 @@
 package com.github.EtkinlikHaritasi.EtkinlikHaritasi
 
+import LoginViewModel
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -38,6 +39,7 @@ import kotlinx.serialization.Serializable
 
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.LoginRepository
 import com.google.android.gms.location.FusedLocationProviderClient
 
 @Serializable
@@ -70,14 +72,15 @@ class MainActivity : ComponentActivity()
         LocationUtils.startContinuousLocationUpdates(this, fusedLocationProviderClient)
 
 
-
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             EtkinlikHaritasiTheme {
-                var girişYaptı = remember { mutableStateOf(false) }
+                var loginViewModel = remember {
+                    LoginViewModel(LoginRepository())
+                }
 
-                if (girişYaptı.value)
+                if (loginViewModel.loginToken.value != null)
                 {
                     val navController = rememberNavController()
 
@@ -100,7 +103,7 @@ class MainActivity : ComponentActivity()
                 }
                 else
                 {
-                    GirişKayıt().İçerik(girişYaptı)
+                    GirişKayıt().İçerik(loginViewModel)
                 }
             }
         }
@@ -278,19 +281,6 @@ fun AltMenü( navController: NavController, modifier: Modifier = Modifier) {
                 }
             }
         )
-        /*items.forEachIndexed { index, item ->
-            NavigationBarItem(
-                icon = {
-                    Icon(
-                        if (selection.value == index) selectedIcons[index] else unselectedIcons[index],
-                        contentDescription = item
-                    )
-                },
-                label = { Text(item) },
-                selected = selection.value == index,
-                onClick = { selection.intValue = index }
-            )
-        }*/
     }
 }
 

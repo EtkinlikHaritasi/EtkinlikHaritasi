@@ -1,5 +1,6 @@
 package com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.tasks.await
 
@@ -11,6 +12,7 @@ class LoginRepository {
             val user = result.user
             user?.getIdToken(true)?.await()?.token
         } catch (e: Exception) {
+            Log.d("Login", e.toString())
             null
         }
     }

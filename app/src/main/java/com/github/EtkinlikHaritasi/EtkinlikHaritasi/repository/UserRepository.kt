@@ -13,8 +13,7 @@ class UserRepository {
 
     suspend fun getUser(id: Int, token: String) = api.getUserById(id, token)
 
-    //suspend fun addUser(user: User, token: String) = api.createUser(user, token)
-    suspend fun addUser(user: User) = api.createUser(user)
+    suspend fun addUser(user: User, token: String) = api.createUser(user, token)
 
     suspend fun updateUser(id: Int, user: User, token: String) = api.updateUser(id, user, token)
 

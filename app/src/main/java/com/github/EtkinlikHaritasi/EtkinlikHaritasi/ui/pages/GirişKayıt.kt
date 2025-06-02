@@ -1,6 +1,8 @@
 package com.github.EtkinlikHaritasi.EtkinlikHaritasi.ui.pages
 
+import LoginViewModel
 import android.text.Layout
+import android.util.Log
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.layout.*
@@ -20,27 +22,29 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.lang.Exception
 import java.security.SecureRandom
+import kotlin.math.log
 
 class GirişKayıt
 {
     @Composable
-    fun İçerik(girişYaptı: MutableState<Boolean>)
+    fun İçerik(loginViewModel: LoginViewModel)
     {
         var scope = rememberCoroutineScope()
         var girişte = remember { mutableStateOf(true) }
 
         if (girişte.value)
         {
-            GirişSayfası(girişte, scope)
+            GirişSayfası(girişte, loginViewModel, scope)
         }
         else
         {
-            KayıtSayfası(girişte, scope)
+            KayıtSayfası(girişte, loginViewModel, scope)
         }
     }
 
     @Composable
-    fun GirişSayfası(girişte: MutableState<Boolean>, scope: CoroutineScope)
+    fun GirişSayfası(girişte: MutableState<Boolean>, loginViewModel: LoginViewModel,
+                     scope: CoroutineScope)
     {
         var e_posta = remember { mutableStateOf("") }
         var parola = remember { mutableStateOf("") }
@@ -96,7 +100,11 @@ class GirişKayıt
 
                         Button(
                             onClick = {
-                                
+                                if (e_posta.value.isNotBlank() && parola.value.isNotBlank())
+                                {
+                                    loginViewModel.login(e_posta.value, parola.value)
+                                    Log.d("Login", "${loginViewModel.loginToken.value}")
+                                }
                             },
                             modifier = Modifier.align(Alignment.CenterHorizontally)
                                 .padding(20.dp)
@@ -126,7 +134,8 @@ class GirişKayıt
     }
 
     @Composable
-    fun KayıtSayfası(girişte: MutableState<Boolean>, scope: CoroutineScope)
+    fun KayıtSayfası(girişte: MutableState<Boolean>, loginViewModel: LoginViewModel,
+                     scope: CoroutineScope)
     {
         var ad = remember { mutableStateOf("") }
         var soyadı = remember { mutableStateOf("") }
@@ -247,7 +256,15 @@ class GirişKayıt
                                     )
 
                                     scope.launch {
-                                        UserRepository().addUser(yeni_üye)
+                                        /*
+                                        val response = UserRepository().addUser(yeni_üye)
+                                        Log.d("Signup", response.message())
+                                        if (response.isSuccessful)
+                                        {
+                                            loginViewModel.login(yeni_üye.email, yeni_üye.password)
+                                            Log.d("Login", "${loginViewModel.loginToken.value}")
+                                        }
+                                         */
                                     }
                                 }
                             },
