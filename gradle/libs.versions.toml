@@ -28,6 +28,7 @@ junitKtx = "1.2.1"
 generativeAI = "0.3.0"
 ktxCoroutines = "1.7.3"
 firebaseAuthKtx = "23.2.1"
+play-services-nearby = "19.3.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -75,6 +76,7 @@ squareup-retrofit2-converter-gson = { group = "com.squareup.retrofit2", name = "
 google-ai-client-generativeai = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "generativeAI" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "ktxCoroutines" }
 firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
+android-gms-play-services-nearby = { module = "com.google.android.gms:play-services-nearby", version.ref = "play-services-nearby" }
 
 
 [plugins]
@@ -82,4 +84,6 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 secrets-gradle = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin"}
+
+
 
