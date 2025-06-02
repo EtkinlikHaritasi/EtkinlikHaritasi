@@ -1,6 +1,7 @@
 package com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "event_table")
@@ -12,5 +13,6 @@ data class Event(
     val lat: Double,
     val lng: Double,
     val date: String,
-    val time: String
+    val time: String,
+    val organizerId: Int
 )

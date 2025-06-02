@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.User
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.ui.theme.Typography
 
 class Bilet
@@ -54,7 +55,7 @@ class Bilet
 
     @ExperimentalGetImage
     @Composable
-    fun İçerik(modifier: Modifier) {
+    fun İçerik(modifier: Modifier, user: MutableState<User>) {
         if (LocalActivity.current != null)
         {
             var activity = LocalActivity.current as Activity

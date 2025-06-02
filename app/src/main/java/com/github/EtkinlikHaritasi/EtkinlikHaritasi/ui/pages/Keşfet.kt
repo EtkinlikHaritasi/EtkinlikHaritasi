@@ -64,7 +64,7 @@ class Keşfet
 
     @ExperimentalMaterial3Api
     @Composable
-    fun İçerik(modifier: Modifier = Modifier)
+    fun İçerik(modifier: Modifier = Modifier, user: MutableState<User>)
     {
         val context = LocalContext.current
         val fusedLocationProviderClient = remember {
@@ -156,9 +156,9 @@ class Keşfet
                         }*/
                     },
                     onMapLoaded = {
-                        scope.launch {
+                        //scope.launch {
                             //events.value = EventRepository(db.eventDao()).getAllEventsList()
-                        }
+                        //}
                     }
                 )
                 {
@@ -198,7 +198,8 @@ class Keşfet
 
                 if (locationGotClicked.value)
                 {
-                    YeniEtkinlikOluşturucu(clickedLocation.value, locationGotClicked, db, scope)
+                    YeniEtkinlikOluşturucu(clickedLocation.value, locationGotClicked, db, scope,
+                        user)
                 }
 
             }
@@ -270,7 +271,7 @@ class Keşfet
     @ExperimentalMaterial3Api
     @Composable
     fun YeniEtkinlikOluşturucu(konum: LatLng, locationGotClicked: MutableState<Boolean>,
-                               db: AppDatabase, scope: CoroutineScope)
+                               db: AppDatabase, scope: CoroutineScope, user: MutableState<User>)
     {
         var ad = remember { mutableStateOf("") }
         var açıklama = remember { mutableStateOf("") }
@@ -462,7 +463,8 @@ class Keşfet
                                             lat = konum.latitude,
                                             lng = konum.longitude,
                                             date = DateTimeStrings.yMd(seçilen_tarih.value!!, "-"),
-                                            time = "${seçilen_saat.value}:${seçilen_dakika.value}"
+                                            time = "${seçilen_saat.value}:${seçilen_dakika.value}",
+                                            organizerId = user.value.id
                                         )
 
                                         scope.launch {

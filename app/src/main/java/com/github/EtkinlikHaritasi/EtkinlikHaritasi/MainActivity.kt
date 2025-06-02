@@ -39,6 +39,7 @@ import kotlinx.serialization.Serializable
 
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.User
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.LoginRepository
 import com.google.android.gms.location.FusedLocationProviderClient
 
@@ -80,7 +81,20 @@ class MainActivity : ComponentActivity()
                     LoginViewModel(LoginRepository())
                 }
 
-                if (loginViewModel.loginToken.value != null)
+                var user = remember {
+                    mutableStateOf(
+                        User(
+                            id = -1,
+                            firstName = "Lorem",
+                            lastName = "Ipsumoğlu",
+                            age = 21,
+                            email = "example@example.com",
+                            password = "password"
+                        )
+                    )
+                }
+
+                if (loginViewModel.loginToken.value == null && user != null)
                 {
                     val navController = rememberNavController()
 
@@ -92,11 +106,33 @@ class MainActivity : ComponentActivity()
                     ) { innerPadding ->
                         NavHost(navController = navController, startDestination = KeşfetSayfası)
                         {
-                            composable<KeşfetSayfası> { Keşfet().İçerik(Modifier.padding(innerPadding)) }
-                            composable<RobotSayfası> { Robot().İçerik(Modifier.padding(innerPadding)) }
-                            composable<BiletSayfası> { Bilet().İçerik(Modifier.padding(innerPadding)) }
-                            composable<MikrofonSayfası> { Mikrofon().İçerik(Modifier.padding(innerPadding)) }
-                            composable<KendimSayfası> { Kendim().İçerik(Modifier.padding(innerPadding)) }
+                            composable<KeşfetSayfası> {
+                                Keşfet().İçerik(
+                                    modifier = Modifier.padding(innerPadding),
+                                    user = user)
+                            }
+                            composable<RobotSayfası> {
+                                Robot().İçerik(
+                                    modifier = Modifier.padding(innerPadding)
+                                )
+                            }
+                            composable<BiletSayfası> {
+                                Bilet().İçerik(
+                                    modifier = Modifier.padding(innerPadding),
+                                    user = user
+                                )
+                            }
+                            composable<MikrofonSayfası> {
+                                Mikrofon().İçerik(
+                                    modifier = Modifier.padding(innerPadding)
+                                )
+                            }
+                            composable<KendimSayfası> {
+                                Kendim().İçerik(
+                                    modifier = Modifier.padding(innerPadding),
+                                    user = user
+                                )
+                            }
                             //composable<JWTTestEkrani> { TestLoginScreen(navController) }
                         }
                     }
