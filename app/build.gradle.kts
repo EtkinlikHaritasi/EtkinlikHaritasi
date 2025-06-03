@@ -110,8 +110,7 @@ dependencies {
     implementation(libs.android.maps.compose.utils)
     implementation(libs.android.maps.compose.widgets)
     implementation(kotlin("test"))
-
-
+    
     implementation(platform(libs.google.firebase.bom))
     implementation(libs.google.firebase.analytics)
     implementation (libs.squareup.retrofit2.converter.gson)
@@ -119,4 +118,5 @@ dependencies {
     implementation(libs.google.ai.client.generativeai) // En son sürümü kontrol edin
     implementation(libs.kotlinx.coroutines.core) // Coroutine'ler için
 
+    implementation(libs.android.gms.play.services.nearby)
 }
