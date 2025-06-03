@@ -28,6 +28,8 @@ junitKtx = "1.2.1"
 generativeAI = "0.3.0"
 ktxCoroutines = "1.7.3"
 firebaseAuthKtx = "23.2.1"
+zxing = "3.5.1"
+zxing-android = "4.3.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -75,6 +77,9 @@ squareup-retrofit2-converter-gson = { group = "com.squareup.retrofit2", name = "
 google-ai-client-generativeai = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "generativeAI" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "ktxCoroutines" }
 firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
+zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing" }
+zxing-android-embedded = { group = "com.journeyapps", name = "zxing-android-embedded", version.ref = "zxing-android" }
+
 
 
 [plugins]

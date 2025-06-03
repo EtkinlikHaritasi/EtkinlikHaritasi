@@ -119,4 +119,7 @@ dependencies {
     implementation(libs.google.ai.client.generativeai) // En son sürümü kontrol edin
     implementation(libs.kotlinx.coroutines.core) // Coroutine'ler için
 
+    implementation(libs.zxing.core)
+    implementation(libs.zxing.android.embedded)
+
 }
