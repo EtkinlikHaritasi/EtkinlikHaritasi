@@ -1,5 +1,6 @@
 package com.github.EtkinlikHaritasi.EtkinlikHaritasi
 
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.Event
 import java.util.Calendar
 import kotlin.Int
 
@@ -80,6 +81,29 @@ object DateTimeStrings
         {
             cal = null
         }
+        return cal
+    }
+
+    fun CalendarOfEvent(event: Event): Calendar?
+    {
+        if (event.date.isBlank())
+            return null
+
+        var cal: Calendar? = yMd_toCalendar(event.date, "-")
+        if (cal == null)
+            return null
+
+        if (event.time.isBlank())
+            return cal
+
+        try {
+            var subs = event.time.split(":")
+            cal.set(Calendar.HOUR_OF_DAY, subs[0].toInt())
+            cal.set(Calendar.MINUTE, subs[1].toInt())
+        }
+        catch (e: Exception)
+        {}
+
         return cal
     }
 }

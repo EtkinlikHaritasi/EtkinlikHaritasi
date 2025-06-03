@@ -39,6 +39,7 @@ import kotlinx.serialization.Serializable
 
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.Connectivity.NearbyDeviceUtils
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.User
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.LoginRepository
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -61,6 +62,25 @@ class MainActivity : ComponentActivity()
 {
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
+    private val permissions = arrayOf(
+        Manifest.permission.BLUETOOTH,
+        Manifest.permission.BLUETOOTH_ADMIN,
+        Manifest.permission.BLUETOOTH_CONNECT,
+        Manifest.permission.BLUETOOTH_SCAN,
+        Manifest.permission.BLUETOOTH_ADVERTISE,
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.NEARBY_WIFI_DEVICES // Burası tekrar ele alınacak
+    )
+
+    private fun checkAndRequestPermissions() {
+        val missing = permissions.filter {
+            ActivityCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
+
+        if (missing.isNotEmpty()) {
+            ActivityCompat.requestPermissions(this, missing.toTypedArray(), 101)
+        }
+    }
 
     @ExperimentalMaterial3Api
     @ExperimentalGetImage
@@ -71,6 +91,8 @@ class MainActivity : ComponentActivity()
         LocationUtils.checkLocationPermission(this)
 
         LocationUtils.startContinuousLocationUpdates(this, fusedLocationProviderClient)
+
+        checkAndRequestPermissions()
 
 
         super.onCreate(savedInstanceState)
@@ -94,7 +116,7 @@ class MainActivity : ComponentActivity()
                     )
                 }
 
-                if (loginViewModel.loginToken.value == null && user != null)
+                if (loginViewModel.loginToken.value == null && user.value != null)
                 {
                     val navController = rememberNavController()
 
