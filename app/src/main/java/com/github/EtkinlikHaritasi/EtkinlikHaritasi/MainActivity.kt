@@ -52,6 +52,8 @@ object MikrofonSayfası
 object KendimSayfası
 @Serializable
 object JWTTestEkrani
+@Serializable
+object RegisterSayfasi
 
 
 class MainActivity : ComponentActivity()
@@ -88,6 +90,7 @@ class MainActivity : ComponentActivity()
                         composable<MikrofonSayfası> { Mikrofon().İçerik(Modifier.padding(innerPadding)) }
                         composable<KendimSayfası> { Kendim().İçerik(Modifier.padding(innerPadding)) }
                         composable<JWTTestEkrani> { TestLoginScreen(navController) }
+                        composable<RegisterSayfasi> { RegisterScreen(navController) }
 
 
                     }
