@@ -80,7 +80,9 @@ proje ödevi olarak geliştirilmektedir.
 3. Hafta: Bilet sayfası artık hem NFC hem QR okuma yapabiliyor. Şimdilik biraz kararsız.  
 
 4. Hafta: Haritada bir yere uzun dokunarak yeni etkinlik oluşturulabiliyor.  
-    Daha önceden eklenmiş etkinlikler haritada görüntüleniyor.
+    Daha önceden eklenmiş etkinlikler haritada görüntüleniyor.  
+
+5. Hafta: Giriş ve kayıt için kullanıcı arayüzü yapıldı. Bilet ekranı tamamlanıyor.
 
 ### Sensor (Motion / Location / Environment)
 
@@ -91,7 +93,9 @@ proje ödevi olarak geliştirilmektedir.
 
 2. Hafta: NFC kartlarının ID'leri okunup ekrana yazılmaya başlandı.  
 
-4. Hafta: Bir noktadan diğer bir noktaya yol tarifi veren API bağlandı.
+4. Hafta: Bir noktadan diğer bir noktaya yol tarifi veren API bağlandı.  
+
+5. Hafta: Yakın cihazları arayan ve bağlantı kurabilen kod yazıldı.
 
 ### Authorization (OAuth / OpenID / JWT)
 
