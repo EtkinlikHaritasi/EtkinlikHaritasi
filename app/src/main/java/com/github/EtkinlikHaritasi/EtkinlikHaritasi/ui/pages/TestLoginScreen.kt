@@ -13,6 +13,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.KeşfetSayfası
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.RegisterSayfasi
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.remote.api.AuthApi
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.remote.auth.RetrofitInstance
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.LoginRepository
@@ -82,6 +83,12 @@ fun TestLoginScreen(navController: NavController? = null) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+
+        TextButton(onClick = {
+            navController?.navigate(RegisterSayfasi)
+        }) {
+            Text("Hesabın yok mu? Üye Ol", color = MaterialTheme.colorScheme.primary)
+        }
 
     }
 }
