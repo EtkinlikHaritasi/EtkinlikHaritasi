@@ -100,7 +100,9 @@ proje ödevi olarak geliştirilmektedir.
 ### Authorization (OAuth / OpenID / JWT)
 
 4. Hafta: Firebase Authentication ile kullanıcı girişi entegre edildi.  
-    Giriş yapılan kullanıcıdan JWT token alınıp uygulama içinde kullanılacak şekilde yapılandırıldı.
+    Giriş yapılan kullanıcıdan JWT token alınıp uygulama içinde kullanılacak şekilde yapılandırıldı.  
+
+5. Hafta: Üye olma özelliği yapıldı.
 
 ### Cloud Service (AI)
 

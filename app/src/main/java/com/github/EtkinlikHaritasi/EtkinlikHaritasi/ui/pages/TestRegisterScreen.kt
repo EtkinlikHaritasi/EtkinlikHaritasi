@@ -1,47 +1,34 @@
 package com.github.EtkinlikHaritasi.EtkinlikHaritasi.ui.pages
 
 
-
-import LoginViewModel
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.KeşfetSayfası
-import com.github.EtkinlikHaritasi.EtkinlikHaritasi.RegisterSayfasi
-import com.github.EtkinlikHaritasi.EtkinlikHaritasi.remote.api.AuthApi
-import com.github.EtkinlikHaritasi.EtkinlikHaritasi.remote.auth.RetrofitInstance
-import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.LoginRepository
-
-
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.RegisterRepository
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.viewModel.RegisterViewModel
 
 @Composable
-fun TestLoginScreen(navController: NavController? = null) {
-   // val context = LocalContext.current
-
-    val loginViewModel = remember {
-        //val api = RetrofitInstance.retrofit.create(AuthApi::class.java)
-        val repo = LoginRepository()
-        LoginViewModel(repo)
-    }
+fun RegisterScreen(navController: NavController? = null) {
+    val viewModel = remember { RegisterViewModel(RegisterRepository()) }
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-  //  val loginResult = loginViewModel.loginResult.value
-    val loginToken = loginViewModel.loginToken.value
+    val registrationSuccess = viewModel.registrationSuccess.value
 
+    LaunchedEffect(registrationSuccess) {
+        if (registrationSuccess == true) {
+            println("✅ Kayıt başarılı")
+          //  navController?.navigate(KeşfetSayfası)
+            navController?.popBackStack()
 
-    LaunchedEffect(loginToken) {
-        if (loginToken != null) {
-            println("Firebase Token alındı: $loginToken")
-            // Burada veritabanı isteği vs. yapılabilir
-            navController?.navigate(KeşfetSayfası)
-
+        } else if (registrationSuccess == false) {
+            println("❌ Kayıt başarısız")
         }
     }
 
@@ -52,7 +39,7 @@ fun TestLoginScreen(navController: NavController? = null) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Test Login", style = MaterialTheme.typography.headlineMedium)
+        Text("Üye Ol", style = MaterialTheme.typography.headlineMedium)
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -76,19 +63,14 @@ fun TestLoginScreen(navController: NavController? = null) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(onClick = {
-            loginViewModel.login(email, password)
+            viewModel.register(email, password)
         }) {
-            Text("JWT Giriş Test")
+            Text("Üye Ol")
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-
-        TextButton(onClick = {
-            navController?.navigate(RegisterSayfasi)
-        }) {
-            Text("Hesabın yok mu? Üye Ol", color = MaterialTheme.colorScheme.primary)
+        if (registrationSuccess == false) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text("Kayıt başarısız, lütfen tekrar deneyin.", color = MaterialTheme.colorScheme.error)
         }
-
     }
 }
