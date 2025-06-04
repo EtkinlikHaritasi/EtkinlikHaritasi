@@ -117,6 +117,7 @@ dependencies {
     implementation (libs.squareup.retrofit2.retrofit)
     implementation(libs.google.ai.client.generativeai) // En son sürümü kontrol edin
     implementation(libs.kotlinx.coroutines.core) // Coroutine'ler için
+    implementation(libs.firebase.firestore)
 
     implementation(libs.android.gms.play.services.nearby)
 }

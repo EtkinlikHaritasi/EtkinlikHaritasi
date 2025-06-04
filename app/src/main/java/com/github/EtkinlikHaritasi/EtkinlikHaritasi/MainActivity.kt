@@ -5,6 +5,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -42,6 +43,9 @@ import androidx.core.app.ActivityCompat
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.Connectivity.NearbyDeviceUtils
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.User
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.LoginRepository
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.RegisterRepository
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.UserRepository
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.viewModel.RegisterViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 
 @Serializable
@@ -102,21 +106,14 @@ class MainActivity : ComponentActivity()
                 var loginViewModel = remember {
                     LoginViewModel(LoginRepository())
                 }
-
-                var user = remember {
-                    mutableStateOf(
-                        User(
-                            id = -1,
-                            firstName = "Lorem",
-                            lastName = "Ipsumoğlu",
-                            age = 21,
-                            email = "example@example.com",
-                            password = "password"
-                        )
-                    )
+                var registerViewModel = remember {
+                    RegisterViewModel(RegisterRepository())
                 }
 
-                if (loginViewModel.loginToken.value == null && user.value != null)
+                var user = remember { mutableStateOf<User?>(null) }
+
+
+                if (loginViewModel.loginToken.value != null && user.value != null)
                 {
                     val navController = rememberNavController()
 
@@ -155,13 +152,16 @@ class MainActivity : ComponentActivity()
                                     user = user
                                 )
                             }
-                            //composable<JWTTestEkrani> { TestLoginScreen(navController) }
                         }
                     }
                 }
                 else
                 {
-                    GirişKayıt().İçerik(loginViewModel)
+                    GirişKayıt().İçerik(
+                        loginViewModel = loginViewModel,
+                        registerViewModel = registerViewModel,
+                        user = user
+                    )
                 }
             }
         }

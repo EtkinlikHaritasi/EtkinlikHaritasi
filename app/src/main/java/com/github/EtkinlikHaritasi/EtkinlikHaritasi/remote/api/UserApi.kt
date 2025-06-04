@@ -20,9 +20,16 @@ interface UserApi {
         @Query("auth") token: String
     ): Response<User>
 
-    @POST("users")
+    @GET("users/{email}.json")
+    suspend fun getUser(
+        @Path("email") email: String,
+        @Query("auth") token: String
+    ): Response<User>
+
+    @PUT("users/{email}.json")
     suspend fun createUser(
         @Body user: User,
+        @Path("email") email: String,
         @Query("auth") token: String
     ): Response<User>
 

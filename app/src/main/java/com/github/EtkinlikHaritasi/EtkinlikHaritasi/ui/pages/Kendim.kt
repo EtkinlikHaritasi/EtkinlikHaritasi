@@ -18,14 +18,14 @@ class Kendim
     val başlık = "Kendim"
 
     @Composable
-    fun İçerik(modifier: Modifier, user: MutableState<User>)
+    fun İçerik(modifier: Modifier, user: MutableState<User?>)
     {
         Box(
             modifier = modifier.fillMaxSize()
         )
         {
             Text(
-                text = "${user.value.firstName} ${user.value.lastName}",
+                text = "${user.value?.firstName} ${user.value?.lastName}",
                 style = Typography.displayLarge
             )
         }

@@ -7,7 +7,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import okhttp3.OkHttpClient
 
 object RetrofitInstance {
-    private const val BASE_URL = "https://etkinlikharitasi-9596a-default-rtdb.firebaseio.com/" //FİER BASE URL
+    private const val BASE_URL = //"https://etkinlikharitasi-9596a-default-rtdb.firebaseio.com/" //FİER BASE URL
+        "https://etkinlikharitasi-yzm304-default-rtdb.europe-west1.firebasedatabase.app/"
 
 //    private val client = OkHttpClient.Builder()
 //        .addInterceptor(AuthInterceptor())

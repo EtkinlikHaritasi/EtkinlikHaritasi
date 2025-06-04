@@ -13,7 +13,15 @@ class UserRepository {
 
     suspend fun getUser(id: Int, token: String) = api.getUserById(id, token)
 
-    suspend fun addUser(user: User, token: String) = api.createUser(user, token)
+    suspend fun getUser(email: String, token: String): Response<User> {
+        var a = email.replace("-","--").replace(".","-")
+        return api.getUser(a, token)
+    }
+
+    suspend fun addUser(user: User, token: String): Response<User> {
+        var a = user.email.replace("-","--").replace(".","-")
+        return api.createUser(user, a, token)
+    }
 
     suspend fun updateUser(id: Int, user: User, token: String) = api.updateUser(id, user, token)
 

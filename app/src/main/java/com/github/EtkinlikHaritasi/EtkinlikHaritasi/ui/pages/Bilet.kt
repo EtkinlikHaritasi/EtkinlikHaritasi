@@ -126,7 +126,7 @@ class Bilet
     }
 
     @Composable
-    fun İçerik(modifier: Modifier, user: MutableState<User>)
+    fun İçerik(modifier: Modifier, user: MutableState<User?>)
     {
         if (LocalActivity.current == null)
             return
@@ -185,7 +185,7 @@ class Bilet
     }
 
     @Composable
-    fun NorQ(modifier: Modifier, user: MutableState<User>, activity: Activity, context: Context,
+    fun NorQ(modifier: Modifier, user: MutableState<User?>, activity: Activity, context: Context,
              isTicketController: MutableState<Boolean?>, onParOrOrgScreen: MutableState<Boolean>,
              selectedEvent: MutableState<Event?>, nearbyUtils: MutableState<NearbyDeviceUtils?>)
     {
@@ -291,7 +291,7 @@ class Bilet
     }
 
     @Composable
-    fun EveSel(modifier: Modifier, user: MutableState<User>, activity: Activity, context: Context,
+    fun EveSel(modifier: Modifier, user: MutableState<User?>, activity: Activity, context: Context,
                isTicketController: MutableState<Boolean?>, onParOrOrgScreen: MutableState<Boolean>,
                allEvents: List<Event>, selectedEvent: MutableState<Event?>)
     {
@@ -302,8 +302,8 @@ class Bilet
             var cal = DateTimeStrings.CalendarOfEvent(event = it)
             cal != null
                     && cal >= Calendar.getInstance()
-                    && if (isTicketController.value!!) it.organizerId == user.value.id
-                    else it.organizerId != user.value.id
+                    && if (isTicketController.value!!) it.organizerId == user.value?.id
+                    else it.organizerId != user.value?.id
         }.sortedBy {
             DateTimeStrings.CalendarOfEvent(event = it)
         }
@@ -382,7 +382,7 @@ class Bilet
     }
 
     @Composable
-    fun ParOrOrg(modifier: Modifier, user: MutableState<User>, activity: Activity, context: Context,
+    fun ParOrOrg(modifier: Modifier, user: MutableState<User?>, activity: Activity, context: Context,
                  isTicketController: MutableState<Boolean?>, onParOrOrgScreen: MutableState<Boolean>)
     {
         Column (

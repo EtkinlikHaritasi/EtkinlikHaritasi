@@ -3,21 +3,31 @@ package com.github.EtkinlikHaritasi.EtkinlikHaritasi.ui.pages
 import LoginViewModel
 import android.text.Layout
 import android.util.Log
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.layout.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.dao.EventDao
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.database.AppDatabase
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.database.AppDatabaseInstance
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.Event
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.User
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.EventRepository
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.UserRepository
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.ui.theme.Typography
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.viewModel.RegisterViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.lang.Exception
@@ -27,27 +37,40 @@ import kotlin.math.log
 class GirişKayıt
 {
     @Composable
-    fun İçerik(loginViewModel: LoginViewModel)
+    fun İçerik(loginViewModel: LoginViewModel, registerViewModel: RegisterViewModel,
+               user: MutableState<User?>)
     {
         var scope = rememberCoroutineScope()
         var girişte = remember { mutableStateOf(true) }
 
         if (girişte.value)
         {
-            GirişSayfası(girişte, loginViewModel, scope)
+            GirişSayfası(girişte, loginViewModel, user, scope)
         }
         else
         {
-            KayıtSayfası(girişte, loginViewModel, scope)
+            KayıtSayfası(girişte, loginViewModel, registerViewModel, user, scope)
         }
     }
 
     @Composable
     fun GirişSayfası(girişte: MutableState<Boolean>, loginViewModel: LoginViewModel,
-                     scope: CoroutineScope)
+                     user: MutableState<User?>, scope: CoroutineScope)
     {
         var e_posta = remember { mutableStateOf("") }
         var parola = remember { mutableStateOf("") }
+
+        LaunchedEffect(loginViewModel.loginToken.value) {
+            if (loginViewModel.loginToken.value != null)
+            {
+                Log.d("Login", "${loginViewModel.loginToken.value}")
+                user.value = UserRepository().getUser(
+                    e_posta.value.trim(),
+                    "${loginViewModel.loginToken.value}"
+                ).body()
+                Log.d("Kullanıcı", "${user.value}")
+            }
+        }
 
         Scaffold(
             modifier = Modifier.fillMaxSize()
@@ -102,8 +125,9 @@ class GirişKayıt
                             onClick = {
                                 if (e_posta.value.isNotBlank() && parola.value.isNotBlank())
                                 {
-                                    loginViewModel.login(e_posta.value, parola.value)
+                                    loginViewModel.login(e_posta.value.trim(), parola.value)
                                     Log.d("Login", "${loginViewModel.loginToken.value}")
+
                                 }
                             },
                             modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -135,6 +159,7 @@ class GirişKayıt
 
     @Composable
     fun KayıtSayfası(girişte: MutableState<Boolean>, loginViewModel: LoginViewModel,
+                     registerViewModel: RegisterViewModel, user: MutableState<User?>,
                      scope: CoroutineScope)
     {
         var ad = remember { mutableStateOf("") }
@@ -142,6 +167,29 @@ class GirişKayıt
         var yaş = remember { mutableStateOf(0) }
         var e_posta = remember { mutableStateOf("") }
         var parola = remember { mutableStateOf("") }
+
+        var new_user = remember { mutableStateOf<User?>(null) }
+        var new_passwd = remember { mutableStateOf<String>("") }
+
+        LaunchedEffect(registerViewModel.registrationSuccess.value, new_user.value) {
+            if (registerViewModel.registrationSuccess.value == true && new_user.value != null)
+            {
+                loginViewModel.login(new_user.value!!.email, new_passwd.value)
+            }
+        }
+
+        var repo = UserRepository()
+        LaunchedEffect(loginViewModel.loginToken.value) {
+            if (loginViewModel.loginToken.value != null)
+            {
+                Log.d("Kullanıcı", "${repo.getUser(new_user.value!!.email, loginViewModel.loginToken.value!!).body()}")
+                UserRepository().addUser(
+                    new_user.value!!,
+                    loginViewModel.loginToken.value!!)
+                Log.d("Kullanıcı", "${repo.getUser(new_user.value!!.email, loginViewModel.loginToken.value!!).body()}")
+                user.value = new_user.value
+            }
+        }
 
         Scaffold(
             modifier = Modifier.fillMaxSize()
@@ -245,27 +293,17 @@ class GirişKayıt
                                     && ad.value.isNotBlank() && soyadı.value.isNotBlank()
                                     && yaş.value > 0)
                                 {
-                                    e_posta.value.trim()
-                                    var yeni_üye = User(
+
+                                    new_user.value = User(
                                         id = SecureRandom().nextInt(),
-                                        firstName = ad.value,
-                                        lastName = soyadı.value,
+                                        firstName = ad.value.trim(),
+                                        lastName = soyadı.value.trim(),
                                         age = yaş.value,
-                                        email = e_posta.value,
-                                        password = parola.value
+                                        email = e_posta.value.trim()
                                     )
 
-                                    scope.launch {
-                                        /*
-                                        val response = UserRepository().addUser(yeni_üye)
-                                        Log.d("Signup", response.message())
-                                        if (response.isSuccessful)
-                                        {
-                                            loginViewModel.login(yeni_üye.email, yeni_üye.password)
-                                            Log.d("Login", "${loginViewModel.loginToken.value}")
-                                        }
-                                         */
-                                    }
+                                    new_passwd.value = parola.value
+                                    registerViewModel.register(new_user.value!!.email, new_passwd.value)
                                 }
                             },
                             modifier = Modifier.align(Alignment.CenterHorizontally)

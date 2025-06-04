@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "499433192162",
-    "project_id": "etkinlikharitasi-9596a",
-    "storage_bucket": "etkinlikharitasi-9596a.firebasestorage.app"
+    "project_number": "383030917373",
+    "project_id": "etkinlikharitasi-yzm304",
+    "storage_bucket": "etkinlikharitasi-yzm304.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:499433192162:android:e49ac04ef40af690cb7cbb",
+        "mobilesdk_app_id": "1:383030917373:android:e41cd11f89fc027e5fa694",
         "android_client_info": {
           "package_name": "com.github.EtkinlikHaritasi.EtkinlikHaritasi"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCptASswl7VVE-5zUlCuH54edZwLOo9uaI"
+          "current_key": "AIzaSyAjqNZPELhBV056PNJlRGeW0vMEAEl6FfE"
         }
       ],
       "services": {

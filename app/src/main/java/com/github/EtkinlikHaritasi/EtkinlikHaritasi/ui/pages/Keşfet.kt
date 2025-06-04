@@ -64,7 +64,7 @@ class Keşfet
 
     @ExperimentalMaterial3Api
     @Composable
-    fun İçerik(modifier: Modifier = Modifier, user: MutableState<User>)
+    fun İçerik(modifier: Modifier = Modifier, user: MutableState<User?>)
     {
         val context = LocalContext.current
         val fusedLocationProviderClient = remember {
@@ -271,7 +271,7 @@ class Keşfet
     @ExperimentalMaterial3Api
     @Composable
     fun YeniEtkinlikOluşturucu(konum: LatLng, locationGotClicked: MutableState<Boolean>,
-                               db: AppDatabase, scope: CoroutineScope, user: MutableState<User>)
+                               db: AppDatabase, scope: CoroutineScope, user: MutableState<User?>)
     {
         var ad = remember { mutableStateOf("") }
         var açıklama = remember { mutableStateOf("") }
@@ -464,7 +464,7 @@ class Keşfet
                                             lng = konum.longitude,
                                             date = DateTimeStrings.yMd(seçilen_tarih.value!!, "-"),
                                             time = "${seçilen_saat.value}:${seçilen_dakika.value}",
-                                            organizerId = user.value.id
+                                            organizerId = user.value!!.id
                                         )
 
                                         scope.launch {
