@@ -1,4 +1,3 @@
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -36,6 +35,8 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+        manifestPlaceholders["GEMINI_API_KEY"] = project.findProperty("GEMINI_API_KEY")?.toString() ?: ""
+        buildConfigField("String", "GEMINI_API_KEY", "\"${project.findProperty("GEMINI_API_KEY") ?: ""}\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -102,15 +103,16 @@ dependencies {
     implementation(libs.androidx.fragment.ktx)
 
     implementation(libs.kotlinx.serialization.json)
-    // JSON serialization library, works with the Kotlin serialization plugin
-    //implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
     implementation(libs.android.gms.play.services.location)
     implementation(libs.android.maps.compose)
     implementation(libs.android.maps.compose.utils)
     implementation(libs.android.maps.compose.widgets)
     implementation(kotlin("test"))
-    
+
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.google.code.gson)
+
     implementation(platform(libs.google.firebase.bom))
     implementation(libs.google.firebase.analytics)
     implementation (libs.squareup.retrofit2.converter.gson)

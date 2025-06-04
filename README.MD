@@ -14,7 +14,7 @@ proje ödevi olarak geliştirilmektedir.
 | Local Database (Room / CoreData)                         | Rukiye Berna Turan  | develop-local-database    |
 | RESTFul API (CRUD)                                       | Mehmet Fadıl Boyacı | develop-restfulApi        |
 | UI (Compose / SwiftUI)                                   | Yusuf Kozan         | develop-ui                |
-| Background Process / Task                                | Şükrü Fırat Sarp    |                           |
+| Background Process / Task                                | Şükrü Fırat Sarp    | develop-Background-Task   |
 | Broadcast Receiver / NSNotificationCenter                | Yusuf Kozan         |                           |
 | Sensor (Motion / Location / Environment)                 | Habil Tataroğulları | develop-sensor            |
 | Connectivity (BLE / Wifi / Cellular Network / USB / NFC) | Habil Tataroğulları | develop-connectivity      |
@@ -83,6 +83,11 @@ proje ödevi olarak geliştirilmektedir.
     Daha önceden eklenmiş etkinlikler haritada görüntüleniyor.  
 
 5. Hafta: Giriş ve kayıt için kullanıcı arayüzü yapıldı. Bilet ekranı tamamlanıyor.
+
+### Background Process / Task
+
+4. Hafta: Etkinliğe kalan süre bildirimi ve etkinlik müşteri hizmetlerinde veri tabanındaki
+    etkinliklere göre öneri yapma eklendi.
 
 ### Sensor (Motion / Location / Environment)
 

@@ -85,11 +85,12 @@ class Mikrofon {
         MicScreen(modifier)
     }
 
+
     @Composable
     private fun MicScreen(modifier: Modifier = Modifier) {
         val context = LocalContext.current
         var speechText by remember { mutableStateOf("Mikrofon Açıldı") }
-        var geminiResponseText by remember { mutableStateOf("") }
+        var geminiResponseText by remember { mutableStateOf("Etkinlik Asistanı") }
 
         val receiver = remember {
             object : BroadcastReceiver() {
@@ -126,7 +127,8 @@ class Mikrofon {
             )
 
             val serviceIntent = Intent(context, SpeechRecognitionService::class.java)
-            ContextCompat.startForegroundService(context, serviceIntent)
+            context.startService(serviceIntent)
+
 
             onDispose {
                 context.unregisterReceiver(receiver)
@@ -153,6 +155,18 @@ class Mikrofon {
                     .size(80.dp)
                     .padding(bottom = 16.dp)
             )
+
+            // ✅ Dinlemeyi başlatan buton
+            Button(
+                onClick = {
+                    val intent = Intent("START_LISTENING")
+                    context.sendBroadcast(intent)
+                }
+            ) {
+                Icon(imageVector = Icons.Outlined.Mic, contentDescription = "Dinlemeyi Başlat")
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "Mikrofona Konuş")
+            }
 
             // Konuşma sonucu
             Box(
@@ -211,4 +225,5 @@ class Mikrofon {
             Spacer(modifier = Modifier.weight(1f))
         }
     }
+
 }
