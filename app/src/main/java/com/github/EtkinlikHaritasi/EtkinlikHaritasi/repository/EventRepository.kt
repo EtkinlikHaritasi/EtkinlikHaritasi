@@ -24,11 +24,13 @@ class EventRepository(private val eventDao: EventDao) {
         }
     }
 
-    suspend fun getEvents(token: String) = api.getAllEvents(token)
+    suspend fun getEvents(token: String): List<Event>? {
+        return api.getAllEvents(token).body()?.values?.toList()
+    }
 
     suspend fun getEvent(id: Int, token: String) = api.getEventById(id, token)
 
-    suspend fun addEvent(event: Event, token: String) = api.createEvent(event, token)
+    suspend fun addEvent(event: Event, token: String) = api.createEvent(event, token = token)
 
     suspend fun updateEvent(id: Int, event: Event, token: String) =
         api.updateEvent(id, event, token)

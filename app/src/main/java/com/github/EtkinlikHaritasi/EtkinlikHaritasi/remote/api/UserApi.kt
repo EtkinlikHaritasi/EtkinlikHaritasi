@@ -10,15 +10,12 @@ interface UserApi {
     //suspend fun getAllUsers(): Response<List<User>>
     suspend fun getAllUsers(@Query("auth") token: String): Response<List<User>>
 
-//    @GET("users/{id}")
-//    suspend fun getUserById(
-//        @Path("id") userId: Int
-//    ): Response<User>
-    @GET("users/{id}.json")
+
+    @GET("users.json/?orderBy=\"id\"")
     suspend fun getUserById(
-        @Path("id") userId: Int,
+        @Query("equalTo") userId: Int,
         @Query("auth") token: String
-    ): Response<User>
+    ): Response<Map<String, User>>
 
     @GET("users/{email}.json")
     suspend fun getUser(
@@ -33,16 +30,16 @@ interface UserApi {
         @Query("auth") token: String
     ): Response<User>
 
-    @PUT("users/{id}")
+    @PATCH("users/{email}.json")
     suspend fun updateUser(
-        @Path("id") userId: Int,
+        @Path("email") email: String,
         @Body user: User,
         @Query("auth") token: String
     ): Response<User>
 
-    @DELETE("users/{id}")
+    @DELETE("users/{email}.json")
     suspend fun deleteUser(
-        @Path("id") userId: Int,
+        @Path("email") userId: String,
         @Query("auth") token: String
     ): Response<Unit>
 }

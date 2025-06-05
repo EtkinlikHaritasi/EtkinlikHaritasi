@@ -11,7 +11,9 @@ class UserRepository {
 
     suspend fun getUsers(token: String) = api.getAllUsers(token)
 
-    suspend fun getUser(id: Int, token: String) = api.getUserById(id, token)
+    suspend fun getUser(id: Int, token: String): User? {
+        return api.getUserById(id, token).body()?.values?.first()
+    }
 
     suspend fun getUser(email: String, token: String): Response<User> {
         var a = email.replace("-","--").replace(".","-")
@@ -23,7 +25,13 @@ class UserRepository {
         return api.createUser(user, a, token)
     }
 
-    suspend fun updateUser(id: Int, user: User, token: String) = api.updateUser(id, user, token)
+    suspend fun updateUser(email: String, user: User, token: String): Response<User> {
+        var a = email.replace("-","--").replace(".","-")
+        return api.updateUser(a, user, token)
+    }
 
-    suspend fun deleteUser(id: Int, token: String) = api.deleteUser(id, token)
+    suspend fun deleteUser(email: String, token: String): Response<Unit> {
+        var a = email.replace("-", "--").replace(".", "-")
+        return api.deleteUser(a, token)
+    }
 }

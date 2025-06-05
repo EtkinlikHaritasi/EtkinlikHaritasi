@@ -13,28 +13,29 @@ interface EventApi {
     suspend fun getAllEvents(@Query("auth") token: String): Response<Map<String, Event>>
 
 
-    @GET("events/{id}")
+    @GET("events/{id}.json")
     suspend fun getEventById(
         @Path("id") eventId: Int,
-        token: String
+        @Query("auth") token: String
     ): Response<Event>
 
-    @POST("events")
+    @PUT("events/{id}.json")
     suspend fun createEvent(
         @Body event: Event,
-        token: String
+        @Path("id") eventId: Int = event.eventId,
+        @Query("auth") token: String,
     ): Response<Event>
 
-    @PUT("events/{id}")
+    @PATCH("events/{id}.json")
     suspend fun updateEvent(
         @Path("id") eventId: Int,
         @Body event: Event,
-        token: String
+        @Query("auth") token: String
     ): Response<Event>
 
-    @DELETE("events/{id}")
+    @DELETE("events/{id}.json")
     suspend fun deleteEvent(
         @Path("id") eventId: Int,
-        token: String
+        @Query("auth") token: String
     ): Response<Unit>
 }

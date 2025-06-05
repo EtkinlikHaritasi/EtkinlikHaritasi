@@ -34,6 +34,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusModifier
@@ -48,9 +49,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.Connectivity.NearbyDeviceUtils
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.DateTimeStrings
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.database.AppDatabase
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.Event
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.User
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.EventRepository
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.ui.theme.Typography
+import kotlinx.coroutines.launch
 import java.util.Calendar
 
 class Bilet
@@ -126,21 +130,32 @@ class Bilet
     }
 
     @Composable
-    fun İçerik(modifier: Modifier, user: MutableState<User?>)
+    fun İçerik(modifier: Modifier, user: MutableState<User?>,
+               loginToken: String, database: AppDatabase)
     {
         if (LocalActivity.current == null)
             return
 
         var activity = LocalActivity.current as Activity
         var context = LocalContext.current
+        val scope = rememberCoroutineScope()
 
         var isTicketController = remember { mutableStateOf<Boolean?>(null) }
         var onParOrOrgScreen = remember { mutableStateOf(true) }
         var nearbyUtils = remember { mutableStateOf<NearbyDeviceUtils?>(null) }
 
-        var allEvents: List<Event> = placeholderEvents()
+        var allEvents by remember { mutableStateOf<List<Event>>(emptyList<Event>()) }
 
         var selectedEvent = remember { mutableStateOf<Event?>(null) }
+
+        LifecycleEventEffect(Lifecycle.Event.ON_START) {
+            scope.launch {
+                var eventRepo = EventRepository(database.eventDao())
+                eventRepo.refreshEventsFromApi(loginToken)
+                allEvents = eventRepo.getEvents(loginToken).orEmpty()
+                    //database.eventDao().getAllEvents().value
+            }
+        }
 
         if (onParOrOrgScreen.value)
         {
