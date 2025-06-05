@@ -41,7 +41,9 @@ proje ödevi olarak geliştirilmektedir.
 
 1. Hafta: QR kod tarayıcı özelliği için kamera izin yönetimi eklenmiştir.  
     Geleneksel `onRequestPermissionsResult` yöntemi kaldırılmış ve yerine Jetpack Compose ile uyumlu
-    `rememberLauncherForActivityResult` API’si kullanılmıştır ve gerekli kütüphaneler eklenmiştir.
+    `rememberLauncherForActivityResult` API’si kullanılmıştır ve gerekli kütüphaneler eklenmiştir.  
+
+5. Hafta: FileUtils dosyası ile file system'e png kayıt eden fonksiyon ve gerekli permission eklendi.
 
 ### Local Database (Room / CoreData)
 
