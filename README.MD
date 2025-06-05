@@ -92,7 +92,8 @@ proje ödevi olarak geliştirilmektedir.
 ### Sensor (Motion / Location / Environment)
 
 1. Hafta: GPS verisi okuma işlemi bir butona bağlanarak yapıldı.
-2. Hafta: Konum bilgisi 5 saniye aralıklarla otomatik bir şekilde alınmaya başlandı.
+2. Hafta: Konum bilgisi 5 saniye aralıklarla otomatik bir şekilde alınmaya başlandı.  
+5. Hafta: QR oluşturucu eklendi.
 
 ### Connectivity (BLE / Wifi / Cellular Network / USB / NFC)
 

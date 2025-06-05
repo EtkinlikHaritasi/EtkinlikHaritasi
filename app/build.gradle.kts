@@ -122,4 +122,6 @@ dependencies {
     implementation(libs.firebase.firestore)
 
     implementation(libs.android.gms.play.services.nearby)
+    implementation(libs.zxing.core)
+    implementation(libs.zxing.android.embedded)
 }
