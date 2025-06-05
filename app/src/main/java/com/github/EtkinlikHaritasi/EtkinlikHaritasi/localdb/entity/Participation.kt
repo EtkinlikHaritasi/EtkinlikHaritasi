@@ -25,5 +25,5 @@ import androidx.room.ForeignKey
 data class Participation(
     val userId: Int,
     val eventId: Int,
-    val joinedAt: String
+    val checkedIn: Boolean
 )

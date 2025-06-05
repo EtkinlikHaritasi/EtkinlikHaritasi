@@ -7,29 +7,39 @@ import retrofit2.http.*
 interface ParticipationApi {
 
     @GET("participations.json")
-    suspend fun getAllParticipations(): Response<List<Participation>>
+    suspend fun getAllParticipations(@Query("auth") token: String): Response<Map<String, Participation>>
 
-    @GET("participations/{userId}/{eventId}.json")
-    suspend fun getParticipation(
-        @Path("userId") userId: Int,
-        @Path("eventId") eventId: Int
-    ): Response<Participation>
+    @GET("participations.json?orderBy=\"userId\"")
+    suspend fun getPartiticipationsByUser(
+        @Query("equalTo") userId: Int,
+        @Query("auth") token: String
+    ): Response<Map<String, Participation>>
 
-    @POST("participations.json")
+    @GET("participations.json?orderBy=\"eventId\"")
+    suspend fun getPartiticipationsByEvent(
+        @Query("equalTo") eventId: Int,
+        @Query("auth") token: String
+    ): Response<Map<String, Participation>>
+
+    @POST("participations/{user_event}.json")
     suspend fun createParticipation(
-        @Body participation: Participation
+        @Body participation: Participation,
+        @Path("user_event") user_event: String = "${participation.userId}_${participation.eventId}",
+        @Query("auth") token: String
     ): Response<Participation>
 
-    @PUT("participations/{userId}/{eventId}.json")
+    @PATCH("participations/{userId}_{eventId}.json")
     suspend fun updateParticipation(
         @Path("userId") userId: Int,
         @Path("eventId") eventId: Int,
-        @Body participation: Participation
+        @Body participation: Participation,
+        @Query("auth") token: String
     ): Response<Participation>
 
-    @DELETE("participations/{userId}/{eventId}.json")
+    @DELETE("participations/{userId}_{eventId}.json")
     suspend fun deleteParticipation(
         @Path("userId") userId: Int,
-        @Path("eventId") eventId: Int
+        @Path("eventId") eventId: Int,
+        @Query("auth") token: String
     ): Response<Unit>
 }
