@@ -40,7 +40,7 @@ class SpeechRecognitionService : Service() {
     private val serviceJob = SupervisorJob()
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
     private var prevcommand: String = ""
-    private lateinit var textToSpeech: TextToSpeech
+//    private lateinit var textToSpeech: TextToSpeech
 
 
     private val listenReceiver = object : BroadcastReceiver() {
