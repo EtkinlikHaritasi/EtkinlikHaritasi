@@ -2,15 +2,24 @@ package com.github.EtkinlikHaritasi.EtkinlikHaritasi.Connectivity
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.lifecycle.LiveData
 import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.*
 
 class NearbyDeviceUtils(private val context: Context,
                         private val deviceName: String,
+                        var discoveries: SnapshotStateList<DiscoveredEndpointInfo>,
+                        var recievedData: MutableState<String?>,
+                        var str: SnapshotStateList<String>,
                         private val strategy: Strategy = Strategy.P2P_POINT_TO_POINT)
 {
     private val connectionsClient = Nearby.getConnectionsClient(context)
-    private val discoveredDevices = mutableListOf<DiscoveredEndpointInfo>()
+    //var discoveredDevices = mutableListOf<DiscoveredEndpointInfo>()
+    //    private set
+    //var recievedData: String? = null
+    //    private set
 
     //Alıcı telefonun çalıştırdığı task alıcıdan gelen isteği otomatik kabul ediyor.
     private val connectionLifecycleCallback = object : ConnectionLifecycleCallback()
@@ -44,16 +53,19 @@ class NearbyDeviceUtils(private val context: Context,
         override fun onEndpointFound(endpointId: String, info: DiscoveredEndpointInfo)
         {
             Log.d("a","Cihaz bulundu: ${info.endpointName}")
+            str.add("a")
 
-            if (discoveredDevices.none { it == info })
+            if (discoveries.none { it == info })
             {
-                discoveredDevices.add(info)
+                discoveries.add(info)
+                Log.d("a", discoveries.toString())
                 Log.d("a", "Yeni cihaz eklendi: ${info.endpointName} - $endpointId")
             }
         }
 
         override fun onEndpointLost(endpointId: String)
         {
+            str.add("a")
             Log.d("a","Cihaz kayboldu: $endpointId")
         }
     }
@@ -95,6 +107,7 @@ class NearbyDeviceUtils(private val context: Context,
         override fun onPayloadReceived(endpointId: String, payload: Payload)
         {
             val data = payload.asBytes()?.toString(Charsets.UTF_8)
+            recievedData.value = data
             Log.d("a","Veri alındı: $data")
         }
 

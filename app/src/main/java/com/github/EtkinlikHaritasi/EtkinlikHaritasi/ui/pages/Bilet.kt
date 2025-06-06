@@ -35,6 +35,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
@@ -59,6 +60,8 @@ import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.EventRepository
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.ParticipationRepository
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.ui.theme.Typography
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.utils.FileUtils
+import com.google.android.gms.nearby.Nearby
+import com.google.android.gms.nearby.connection.DiscoveredEndpointInfo
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
@@ -231,7 +234,6 @@ class Bilet
         }
     }
 
-
     @ExperimentalGetImage
     @Composable
     fun FinalStep(modifier: Modifier, user: User, loginToken: String,
@@ -245,7 +247,7 @@ class Bilet
         var permissionGranted by remember { mutableStateOf(false) }
 
         val defaultInfo = "Bilet Kontrol"
-        var infoText by remember { mutableStateOf<String>(defaultInfo) }
+        var infoText = remember { mutableStateOf<String>(defaultInfo) }
 
         val ticketId: String = "${selectedEvent.value?.eventId}_${user.id}"
         var QResult by remember { mutableStateOf<String?>(null) }
@@ -253,7 +255,7 @@ class Bilet
         LaunchedEffect(QResult) {
             if (!QResult.isNullOrBlank())
             {
-                infoText = "Kontrol başlıyor..."
+                infoText.value = "Kontrol başlıyor..."
                 var parted = QResult?.split("_").orEmpty()
                 if (parted.size >= 2)
                 {
@@ -262,38 +264,43 @@ class Bilet
                         var partRepo = ParticipationRepository()
                         val tbu = partRepo.getParticipationsByEvent(
                             selectedEvent.value!!.eventId, loginToken).filter {
-                            it.userId == parted[1].toIntOrNull() && it.checkedIn == false
+                            it.userId == parted[1].toIntOrNull()
                         }
                         if (tbu.isNotEmpty())
                         {
-                            var updated = Participation(
-                                eventId = tbu[0].eventId,
-                                userId = tbu[0].userId,
-                                checkedIn = true
-                            )
-                            if (partRepo.updateParticipation(
-                                userId = updated.userId,
-                                eventId = updated.eventId,
-                                participation = updated,
-                                token = loginToken
-                            ).isSuccessful) {
-                                Log.d("Event Ticket", "${ticketId} girişi yapıldı.")
-                                infoText = "Giriş Yapıldı"
+                            if (!tbu[0].checkedIn) {
+                                var updated = Participation(
+                                    eventId = tbu[0].eventId,
+                                    userId = tbu[0].userId,
+                                    checkedIn = true
+                                )
+                                if (partRepo.updateParticipation(
+                                        userId = updated.userId,
+                                        eventId = updated.eventId,
+                                        participation = updated,
+                                        token = loginToken
+                                    ).isSuccessful
+                                ) {
+                                    Log.d("Event Ticket", "${QResult} girişi yapıldı.")
+                                    infoText.value = "Giriş Yapıldı"
+                                } else {
+                                    infoText.value = "Kontrol Başarısız"
+                                }
                             }
                             else {
-                                infoText = "Kontrol Başarısız"
+                                infoText.value = "Zaten Giriş Yapılmış"
                             }
                         }
                         else {
-                            infoText = "Kayıt Bulunamadı"
+                            infoText.value = "Kayıt Bulunamadı"
                         }
                     }
                     else {
-                        infoText = "Bilet Farklı Etkinlik İçin"
+                        infoText.value = "Bilet Farklı Etkinlik İçin"
                     }
                 }
                 else {
-                    infoText = "QR hatalı"
+                    infoText.value = "QR hatalı"
                 }
             }
         }
@@ -327,7 +334,7 @@ class Bilet
                     modifier = Modifier.fillMaxWidth().padding(12.dp)
                 ) {
                     Text(
-                        text = infoText,
+                        text = infoText.value,
                         style = Typography.headlineLarge,
                         modifier = Modifier.align(Alignment.TopCenter)
                     )
@@ -352,6 +359,17 @@ class Bilet
                             text = "Yakındaki Cihazlar",
                             style = Typography.headlineLarge
                         )
+                        NearbyControl(
+                            isTicketController = isTicketController.value,
+                            user = user,
+                            loginToken = loginToken,
+                            activity = activity,
+                            context = context,
+                            event = selectedEvent.value!!,
+                            ticketId = ticketId,
+                            nearbyUtils = nearbyUtils,
+                            infoText = infoText
+                        )
                     }
                 }
                 else if (isTicketController.value == true) {
@@ -375,6 +393,123 @@ class Bilet
                         permissionLauncher.launch(Manifest.permission.CAMERA)
                     }
                 }
+            }
+        }
+    }
+
+    @Composable
+    fun NearbyControl(isTicketController: Boolean?, user: User, loginToken: String,
+                      activity: Activity, context: Context, event: Event, ticketId: String,
+                      nearbyUtils: MutableState<NearbyDeviceUtils?>, infoText: MutableState<String>)
+    {
+        val deviceName = "${event.eventId}_${user.id}"
+        var discoveries = remember { mutableStateListOf<DiscoveredEndpointInfo>() }
+        var receivedData = remember { mutableStateOf<String?>(null) }
+        var strl = remember { mutableStateListOf<String>() }
+        nearbyUtils.value = NearbyDeviceUtils(context = context, deviceName = deviceName,
+                discoveries = discoveries, str = strl, recievedData = receivedData)
+
+        LifecycleEventEffect(Lifecycle.Event.ON_START) {
+            if (isTicketController == true) {
+                nearbyUtils.value!!.startAdvertising()
+            } else {
+                nearbyUtils.value!!.startDiscovery()
+            }
+        }
+
+        LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+            if (isTicketController == true) {
+                nearbyUtils.value!!.startAdvertising()
+            } else {
+                nearbyUtils.value!!.startDiscovery()
+            }
+        }
+
+        LifecycleEventEffect(Lifecycle.Event.ON_PAUSE) {
+            if (isTicketController == true) {
+                Nearby.getConnectionsClient(context).stopAdvertising()
+            } else {
+                Nearby.getConnectionsClient(context).stopDiscovery()
+            }
+        }
+        LifecycleEventEffect(Lifecycle.Event.ON_STOP) {
+            if (isTicketController == true) {
+                Nearby.getConnectionsClient(context).stopAdvertising()
+            } else {
+                Nearby.getConnectionsClient(context).stopDiscovery()
+            }
+        }
+
+        LaunchedEffect(strl) {
+            Log.d("b", strl.size.toString())
+        }
+
+        LaunchedEffect(discoveries) {
+            Log.d("Discovery", "Girdi")
+
+            var devices = discoveries.orEmpty()
+            if (devices.isNotEmpty() && isTicketController != true)
+            {
+                val searched_id = "${event.eventId}_${event.organizerId}"
+                val finding = devices.filter {
+                    it.serviceId == searched_id
+                }
+                Log.d("Discovery", finding.size.toString())
+
+                if (finding.isNotEmpty())
+                {
+                    nearbyUtils.value?.sendData(finding[0].serviceId, ticketId)
+                }
+            }
+        }
+
+        LaunchedEffect(receivedData.value) {
+            var data = receivedData.value
+            infoText.value = "Kontrol başlıyor..."
+            var parted = data?.split("_").orEmpty()
+            if (parted.size >= 2) {
+                if (parted[0].toIntOrNull() == event.eventId)
+                {
+                    var partRepo = ParticipationRepository()
+                    val tbu = partRepo.getParticipationsByEvent(
+                        event.eventId, loginToken).filter {
+                        it.userId == parted[1].toIntOrNull()
+                    }
+                    if (tbu.isNotEmpty())
+                    {
+                        if (!tbu[0].checkedIn) {
+                            var updated = Participation(
+                                eventId = tbu[0].eventId,
+                                userId = tbu[0].userId,
+                                checkedIn = true
+                            )
+                            if (partRepo.updateParticipation(
+                                    userId = updated.userId,
+                                    eventId = updated.eventId,
+                                    participation = updated,
+                                    token = loginToken
+                                ).isSuccessful
+                            ) {
+                                Log.d("Event Ticket", "${data} girişi yapıldı.")
+                                infoText.value = "Giriş Yapıldı"
+                            } else {
+                                infoText.value = "Kontrol Başarısız"
+                            }
+                        }
+                        else {
+                            infoText.value = "Zaten Giriş Yapılmış"
+                        }
+                    }
+                    else {
+                        infoText.value = "Kayıt Bulunamadı"
+                    }
+                }
+                else {
+                    infoText.value = "Bilet Farklı Etkinlik İçin"
+                }
+            }
+            else if (data != null) {
+                infoText.value = "Bilet hatalı"
             }
         }
     }
