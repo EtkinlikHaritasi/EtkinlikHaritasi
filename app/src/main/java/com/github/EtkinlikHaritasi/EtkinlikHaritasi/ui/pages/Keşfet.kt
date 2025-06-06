@@ -300,7 +300,7 @@ class Keşfet
                 }
             },
             confirmButton = {
-                if (user?.id != event.organizerId && participations.none{ it.userId == user?.id }) {
+                if (user?.id != event.organizerId && participations.none{ it.eventId == event.eventId }) {
                     TextButton(
                         onClick = {
                             var new_part = Participation(
