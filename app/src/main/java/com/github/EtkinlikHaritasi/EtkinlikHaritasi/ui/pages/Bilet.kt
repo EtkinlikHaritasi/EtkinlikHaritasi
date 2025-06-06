@@ -49,6 +49,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.Connectivity.NearbyDeviceUtils
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.DateTimeStrings
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.Sensor.QrUtils
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.database.AppDatabase
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.Event
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.Participation
@@ -56,6 +57,7 @@ import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.User
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.EventRepository
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.ParticipationRepository
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.ui.theme.Typography
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.utils.FileUtils
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
@@ -131,6 +133,7 @@ class Bilet
         )
     }
 
+    @ExperimentalGetImage
     @Composable
     fun İçerik(modifier: Modifier, user: MutableState<User?>,
                loginToken: String, database: AppDatabase)
@@ -152,6 +155,7 @@ class Bilet
         }
 
         var selectedEvent = remember { mutableStateOf<Event?>(null) }
+        var norqNearby = remember { mutableStateOf<Boolean?>(null) }
 
         LifecycleEventEffect(Lifecycle.Event.ON_START) {
             scope.launch {
@@ -194,25 +198,147 @@ class Bilet
             }
             else
             {
-                NorQ(
-                    modifier = modifier,
-                    user = user,
-                    activity = activity,
-                    context = context,
-                    isTicketController = isTicketController,
-                    onParOrOrgScreen = onParOrOrgScreen,
-                    selectedEvent = selectedEvent,
-                    nearbyUtils = nearbyUtils
-                )
+                if (norqNearby.value == null)
+                {
+                    NorQ(
+                        modifier = modifier,
+                        user = user.value!!,
+                        activity = activity,
+                        context = context,
+                        isTicketController = isTicketController,
+                        onParOrOrgScreen = onParOrOrgScreen,
+                        selectedEvent = selectedEvent,
+                        norqNearby = norqNearby
+                    )
+                }
+                else
+                {
+                    FinalStep(
+                        modifier = modifier,
+                        user = user.value!!,
+                        loginToken = loginToken,
+                        activity = activity,
+                        context = context,
+                        isTicketController = isTicketController,
+                        onParOrOrgScreen = onParOrOrgScreen,
+                        selectedEvent = selectedEvent,
+                        nearbyUtils = nearbyUtils,
+                        norqNearby = norqNearby
+                    )
+                }
+            }
+        }
+    }
+
+
+    @ExperimentalGetImage
+    @Composable
+    fun FinalStep(modifier: Modifier, user: User, loginToken: String,
+                  activity: Activity, context: Context, isTicketController: MutableState<Boolean?>,
+                  onParOrOrgScreen: MutableState<Boolean>, selectedEvent: MutableState<Event?>,
+                  nearbyUtils: MutableState<NearbyDeviceUtils?>, norqNearby: MutableState<Boolean?>)
+    {
+        val permissionLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission()
+        ) {}
+        var QRScannerOn by remember { mutableStateOf(false) }
+
+        val defaultInfo = "Bilet Kontrol"
+        var infoText by remember { mutableStateOf<String>(defaultInfo) }
+
+        val ticketId: String = "${selectedEvent.value?.eventId}_${user.id}"
+
+        Scaffold (
+            modifier = modifier,
+            topBar = {
+                Box (
+                    modifier = Modifier.fillMaxWidth().padding(12.dp)
+                ) {
+                    IconButton(
+                        modifier = Modifier.align(Alignment.CenterStart),
+                        onClick = {
+                            norqNearby.value = null
+                        }
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Outlined.ArrowBack,
+                            contentDescription = "Geri Düğmesi"
+                        )
+                    }
+                    Text(
+                        text = "${selectedEvent.value?.title}",
+                        style = Typography.headlineLarge,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            }
+        ) { paddingValues ->
+            Column (
+                modifier = modifier.fillMaxSize().padding(paddingValues)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxHeight(0.5f).fillMaxWidth()
+                ) {
+                    Column (
+                        modifier = Modifier.fillMaxSize(0.7f).align(Alignment.Center)
+                            //.clip(RoundedCornerShape(20.dp))
+                    ) {
+                        if (norqNearby.value == true) {
+                            Icon(
+                                Icons.Outlined.Contactless,
+                                contentDescription = "Sensör simgesi",
+                                modifier = Modifier.align(Alignment.CenterHorizontally)
+                                    .fillMaxSize(0.45f)
+                            )
+                            Text(
+                                text = "Yakındaki Cihazlar",
+                                style = Typography.headlineLarge
+                            )
+                        }
+                        else if (isTicketController.value == true) {
+                            val permissionGranted = ContextCompat.checkSelfPermission(
+                                context,
+                                Manifest.permission.CAMERA
+                            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
+                            if (permissionGranted) {
+                                QRCodeScanner { result ->
+                                    Log.d("QR Scanner", result)
+                                    Toast.makeText(context, result, Toast.LENGTH_SHORT).show()
+                                    norqNearby.value = null
+                                }
+                            }
+                            else {
+                                permissionLauncher.launch(Manifest.permission.CAMERA)
+                            }
+
+                        }
+                    }
+                }
+                HorizontalDivider(thickness = Dp.Hairline)
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Column (
+                        modifier = Modifier.fillMaxSize(0.7f).align(Alignment.Center)
+                            //.clip(RoundedCornerShape(20.dp))
+                    ) {
+                        Text(
+                            text = infoText,
+                            style = Typography.headlineLarge
+                        )
+                    }
+                }
             }
         }
     }
 
     @Composable
-    fun NorQ(modifier: Modifier, user: MutableState<User?>, activity: Activity, context: Context,
+    fun NorQ(modifier: Modifier, user: User, activity: Activity, context: Context,
              isTicketController: MutableState<Boolean?>, onParOrOrgScreen: MutableState<Boolean>,
-             selectedEvent: MutableState<Event?>, nearbyUtils: MutableState<NearbyDeviceUtils?>)
+             selectedEvent: MutableState<Event?>, norqNearby: MutableState<Boolean?>)
     {
+        val ticketId: String = "${selectedEvent.value?.eventId}_${user.id}"
         Scaffold (
             modifier = modifier,
             topBar = {
@@ -249,26 +375,7 @@ class Bilet
                     TextButton(
                         modifier = Modifier.fillMaxSize(0.7f).align(Alignment.Center),
                         onClick = {
-                            /*
-                            if (selectedEvent.value != null) {
-                                nearbyUtils.value = NearbyDeviceUtils(
-                                    context = context,
-                                    deviceName = "${selectedEvent.value?.eventId}-${user.value.id}"
-                                )
-                                if (isTicketController.value == true)
-                                {
-                                    nearbyUtils.value?.startAdvertising()
-                                }
-                                else if (isTicketController.value == false)
-                                {
-                                    nearbyUtils.value?.startDiscovery()
-                                }
-                                else
-                                {
-                                    nearbyUtils.value = null
-                                }
-                            }
-                             */
+                            norqNearby.value = true
                         },
                         contentPadding = PaddingValues(0.dp),
                         shape = RoundedCornerShape(20.dp)
@@ -293,7 +400,43 @@ class Bilet
                 {
                     TextButton(
                         modifier = Modifier.fillMaxSize(0.7f).align(Alignment.Center),
-                        onClick = {  },
+                        onClick = {
+                            if (isTicketController.value == false) {
+                                val ticketQR = QrUtils.generateQrCode(ticketId)
+                                if (ticketQR != null) {
+                                    val downloaded = FileUtils.saveBitmapAsPng(
+                                        context = context,
+                                        bitmap = ticketQR,
+                                        fileName = "Bilet__${ticketId}"
+                                    )
+                                    if (downloaded) {
+                                        Toast.makeText(
+                                            context,
+                                            "Biletiniz Pictures/QRCode dizinine indirildi.",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                                    else {
+                                        Toast.makeText(
+                                            context,
+                                            "HATA: QR kod indirilemedi.",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                                }
+                                else {
+                                    Toast.makeText(
+                                        context,
+                                        "HATA: QR kod oluşturulamadı.",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                                onParOrOrgScreen.value = true
+                            }
+                            else {
+                                norqNearby.value = false
+                            }
+                        },
                         contentPadding = PaddingValues(0.dp),
                         shape = RoundedCornerShape(20.dp)
                     ) {
