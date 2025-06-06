@@ -33,6 +33,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -241,12 +242,61 @@ class Bilet
         val permissionLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission()
         ) {}
-        var QRScannerOn by remember { mutableStateOf(false) }
+        var permissionGranted by remember { mutableStateOf(false) }
 
         val defaultInfo = "Bilet Kontrol"
         var infoText by remember { mutableStateOf<String>(defaultInfo) }
 
         val ticketId: String = "${selectedEvent.value?.eventId}_${user.id}"
+        var QResult by remember { mutableStateOf<String?>(null) }
+
+        LaunchedEffect(QResult) {
+            if (!QResult.isNullOrBlank())
+            {
+                infoText = "Kontrol başlıyor..."
+                var parted = QResult?.split("_").orEmpty()
+                if (parted.size >= 2)
+                {
+                    if (parted[0].toIntOrNull() == selectedEvent.value!!.eventId)
+                    {
+                        var partRepo = ParticipationRepository()
+                        val tbu = partRepo.getParticipationsByEvent(
+                            selectedEvent.value!!.eventId, loginToken).filter {
+                            it.userId == parted[1].toIntOrNull() && it.checkedIn == false
+                        }
+                        if (tbu.isNotEmpty())
+                        {
+                            var updated = Participation(
+                                eventId = tbu[0].eventId,
+                                userId = tbu[0].userId,
+                                checkedIn = true
+                            )
+                            if (partRepo.updateParticipation(
+                                userId = updated.userId,
+                                eventId = updated.eventId,
+                                participation = updated,
+                                token = loginToken
+                            ).isSuccessful) {
+                                Log.d("Event Ticket", "${ticketId} girişi yapıldı.")
+                                infoText = "Giriş Yapıldı"
+                            }
+                            else {
+                                infoText = "Kontrol Başarısız"
+                            }
+                        }
+                        else {
+                            infoText = "Kayıt Bulunamadı"
+                        }
+                    }
+                    else {
+                        infoText = "Bilet Farklı Etkinlik İçin"
+                    }
+                }
+                else {
+                    infoText = "QR hatalı"
+                }
+            }
+        }
 
         Scaffold (
             modifier = modifier,
@@ -271,62 +321,58 @@ class Bilet
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
+            },
+            bottomBar = {
+                Box (
+                    modifier = Modifier.fillMaxWidth().padding(12.dp)
+                ) {
+                    Text(
+                        text = infoText,
+                        style = Typography.headlineLarge,
+                        modifier = Modifier.align(Alignment.TopCenter)
+                    )
+                }
             }
         ) { paddingValues ->
-            Column (
-                modifier = modifier.fillMaxSize().padding(paddingValues)
+            Box(
+                modifier = Modifier.fillMaxSize().padding(paddingValues)
             ) {
-                Box(
-                    modifier = Modifier.fillMaxHeight(0.5f).fillMaxWidth()
-                ) {
+
+                if (norqNearby.value == true) {
                     Column (
                         modifier = Modifier.fillMaxSize(0.7f).align(Alignment.Center)
-                            //.clip(RoundedCornerShape(20.dp))
                     ) {
-                        if (norqNearby.value == true) {
-                            Icon(
-                                Icons.Outlined.Contactless,
-                                contentDescription = "Sensör simgesi",
-                                modifier = Modifier.align(Alignment.CenterHorizontally)
-                                    .fillMaxSize(0.45f)
-                            )
-                            Text(
-                                text = "Yakındaki Cihazlar",
-                                style = Typography.headlineLarge
-                            )
-                        }
-                        else if (isTicketController.value == true) {
-                            val permissionGranted = ContextCompat.checkSelfPermission(
-                                context,
-                                Manifest.permission.CAMERA
-                            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-
-                            if (permissionGranted) {
-                                QRCodeScanner { result ->
-                                    Log.d("QR Scanner", result)
-                                    Toast.makeText(context, result, Toast.LENGTH_SHORT).show()
-                                    norqNearby.value = null
-                                }
-                            }
-                            else {
-                                permissionLauncher.launch(Manifest.permission.CAMERA)
-                            }
-
-                        }
-                    }
-                }
-                HorizontalDivider(thickness = Dp.Hairline)
-                Box(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Column (
-                        modifier = Modifier.fillMaxSize(0.7f).align(Alignment.Center)
-                            //.clip(RoundedCornerShape(20.dp))
-                    ) {
+                        Icon(
+                            Icons.Outlined.Contactless,
+                            contentDescription = "Sensör simgesi",
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                                .fillMaxSize(0.45f)
+                        )
                         Text(
-                            text = infoText,
+                            text = "Yakındaki Cihazlar",
                             style = Typography.headlineLarge
                         )
+                    }
+                }
+                else if (isTicketController.value == true) {
+                    permissionGranted = ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.CAMERA
+                    ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
+                    if (permissionGranted && QResult == null) {
+                        Box (
+                            modifier = Modifier.fillMaxSize(0.9f).align(Alignment.Center)
+                                .clip(RoundedCornerShape(28.dp))
+                        ) {
+                            QRCodeScanner { result ->
+                                QResult = result
+                                Log.d("QR Scanner", result)
+                            }
+                        }
+                    }
+                    else {
+                        permissionLauncher.launch(Manifest.permission.CAMERA)
                     }
                 }
             }

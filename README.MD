@@ -84,7 +84,8 @@ proje ödevi olarak geliştirilmektedir.
 4. Hafta: Haritada bir yere uzun dokunarak yeni etkinlik oluşturulabiliyor.  
     Daha önceden eklenmiş etkinlikler haritada görüntüleniyor.  
 
-5. Hafta: Giriş ve kayıt için kullanıcı arayüzü yapıldı. Bilet ekranı tamamlanıyor.
+5. Hafta: Giriş ve kayıt için kullanıcı arayüzü yapıldı.
+    QR bilet özellikleri tamamlandı.
 
 ### Background Process / Task
 
