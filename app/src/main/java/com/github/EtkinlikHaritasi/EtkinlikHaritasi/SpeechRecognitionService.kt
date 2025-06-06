@@ -40,6 +40,8 @@ class SpeechRecognitionService : Service() {
     private val serviceJob = SupervisorJob()
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
     private var prevcommand: String = ""
+    private lateinit var textToSpeech: TextToSpeech
+
 
     private val listenReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -147,7 +149,7 @@ class SpeechRecognitionService : Service() {
             Log.d(TAG,  eventTitles)
             val prompt = """
             Kullanıcı şöyle dedi: "$text"
-            kullanıcıya etkinlikler veya aktiviteler öner  kısaca diyalog kurarmısın.
+            kullanıcıya etkinlikler veya aktiviteler öner  kısaca diyalog kurarmısın kullanıcıyı ikna et sadece cevabı ver.
             İşte mevcut etkinlikler: ve zamanları 
             $eventTitles
         """.trimIndent()

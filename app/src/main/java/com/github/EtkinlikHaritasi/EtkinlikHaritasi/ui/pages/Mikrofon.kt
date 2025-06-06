@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material.icons.outlined.Mic
+import androidx.compose.material.icons.outlined.SmartToy
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,12 +30,13 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.R
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.SpeechRecognitionService
-
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 class Mikrofon {
 
-    val açıkken_simge = Icons.Filled.Mic
-    val kapalıyken_simge = Icons.Outlined.Mic
-    val başlık = "Mikrofon"
+    val açıkken_simge = Icons.Filled.SmartToy
+    val kapalıyken_simge = Icons.Outlined.SmartToy
+    val başlık = "Etkinlik asistanı"
 
     @Composable
     fun İçerik(modifier: Modifier = Modifier) {
@@ -129,21 +132,23 @@ class Mikrofon {
             val serviceIntent = Intent(context, SpeechRecognitionService::class.java)
             context.startService(serviceIntent)
 
-
             onDispose {
                 context.unregisterReceiver(receiver)
             }
         }
 
+        val scrollState = rememberScrollState()
+
         Column(
             modifier = modifier
                 .fillMaxSize()
+                .verticalScroll(scrollState) // ⭐️ Kaydırma eklendi
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "Mikrofon Durumu",
+                text = "Etkinlik Asistanı",
                 fontSize = 24.sp,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
@@ -156,7 +161,6 @@ class Mikrofon {
                     .padding(bottom = 16.dp)
             )
 
-            // ✅ Dinlemeyi başlatan buton
             Button(
                 onClick = {
                     val intent = Intent("START_LISTENING")
@@ -168,7 +172,6 @@ class Mikrofon {
                 Text(text = "Mikrofona Konuş")
             }
 
-            // Konuşma sonucu
             Box(
                 modifier = Modifier
                     .padding(vertical = 16.dp)
@@ -194,7 +197,6 @@ class Mikrofon {
                 }
             }
 
-            // Gemini cevabı
             if (geminiResponseText.isNotBlank()) {
                 Box(
                     modifier = Modifier
@@ -208,7 +210,7 @@ class Mikrofon {
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "Gemini Yanıtı:",
+                            text = "Asistan Yanıtı:",
                             fontSize = 18.sp,
                             color = colorResource(id = R.color.black)
                         )
@@ -222,8 +224,9 @@ class Mikrofon {
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(32.dp)) // Alt boşluk
         }
     }
+
 
 }
