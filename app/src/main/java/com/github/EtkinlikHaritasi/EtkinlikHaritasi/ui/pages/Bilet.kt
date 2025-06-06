@@ -51,8 +51,10 @@ import com.github.EtkinlikHaritasi.EtkinlikHaritasi.Connectivity.NearbyDeviceUti
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.DateTimeStrings
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.database.AppDatabase
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.Event
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.Participation
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.User
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.EventRepository
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.ParticipationRepository
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.ui.theme.Typography
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -145,6 +147,9 @@ class Bilet
         var nearbyUtils = remember { mutableStateOf<NearbyDeviceUtils?>(null) }
 
         var allEvents by remember { mutableStateOf<List<Event>>(emptyList<Event>()) }
+        var participations by remember {
+            mutableStateOf<List<Participation>>(emptyList<Participation>())
+        }
 
         var selectedEvent = remember { mutableStateOf<Event?>(null) }
 
@@ -154,6 +159,9 @@ class Bilet
                 eventRepo.refreshEventsFromApi(loginToken)
                 allEvents = eventRepo.getEvents(loginToken).orEmpty()
                     //database.eventDao().getAllEvents().value
+
+                var participationRepo = ParticipationRepository()
+                participations = participationRepo.getParticipationsByUser(user.value!!.id, loginToken)
             }
         }
 
@@ -180,7 +188,8 @@ class Bilet
                     isTicketController = isTicketController,
                     onParOrOrgScreen = onParOrOrgScreen,
                     allEvents = allEvents,
-                    selectedEvent = selectedEvent
+                    selectedEvent = selectedEvent,
+                    participations = participations
                 )
             }
             else
@@ -308,17 +317,20 @@ class Bilet
     @Composable
     fun EveSel(modifier: Modifier, user: MutableState<User?>, activity: Activity, context: Context,
                isTicketController: MutableState<Boolean?>, onParOrOrgScreen: MutableState<Boolean>,
-               allEvents: List<Event>, selectedEvent: MutableState<Event?>)
+               allEvents: List<Event>, selectedEvent: MutableState<Event?>,
+               participations: List<Participation>)
     {
         if (isTicketController.value == null)
             onParOrOrgScreen.value = true
 
-        var events = allEvents.filter {
-            var cal = DateTimeStrings.CalendarOfEvent(event = it)
+        var events = allEvents.filter { event ->
+            var cal = DateTimeStrings.CalendarOfEvent(event = event)
             cal != null
                     && cal >= Calendar.getInstance()
-                    && if (isTicketController.value!!) it.organizerId == user.value?.id
-                    else it.organizerId != user.value?.id
+                    && if (isTicketController.value!!) (event.organizerId == user.value?.id &&
+                        participations.none { it.eventId == event.eventId })
+                    else (event.organizerId != user.value?.id && participations.any {
+                        it.eventId == event.eventId && !it.checkedIn })
         }.sortedBy {
             DateTimeStrings.CalendarOfEvent(event = it)
         }

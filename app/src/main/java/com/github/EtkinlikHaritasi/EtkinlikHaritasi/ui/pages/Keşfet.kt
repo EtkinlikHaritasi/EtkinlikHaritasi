@@ -23,9 +23,11 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusEvent
@@ -76,6 +78,9 @@ class Keşfet
         var locationGotClicked = remember { mutableStateOf(false) }
         var clickedLocation = remember { mutableStateOf(focus_location) }
         var events = remember { mutableStateOf<List<Event>?>(null) }
+        var participations by remember {
+            mutableStateOf<List<Participation>>(emptyList<Participation>())
+        }
         var eventInfoDialogOpen = remember { mutableStateOf(false) }
         var clickedEvent = remember { mutableStateOf<Event?>(null) }
 
@@ -95,6 +100,9 @@ class Keşfet
                     DateTimeStrings.CalendarOfEvent(it)
                 }
                                 //database.eventDao().getAllEvents().value
+
+                var participationRepo = ParticipationRepository()
+                participations = participationRepo.getParticipationsByUser(user.value!!.id, loginToken)
             }
         }
 
@@ -179,7 +187,14 @@ class Keşfet
 
                 if (eventInfoDialogOpen.value && clickedEvent.value != null)
                 {
-                    EtkinlikBilgisi(clickedEvent.value!!, eventInfoDialogOpen, user.value)
+                    EtkinlikBilgisi(
+                        event = clickedEvent.value!!,
+                        eventInfoDialogOpen = eventInfoDialogOpen,
+                        user =  user.value,
+                        loginToken =  loginToken,
+                        participations = participations,
+                        scope = scope
+                    )
                 }
 
                 if (locationGotClicked.value)
@@ -203,7 +218,8 @@ class Keşfet
 
     @Composable
     fun EtkinlikBilgisi(event: Event, eventInfoDialogOpen: MutableState<Boolean>,
-                        user: User?)
+                        user: User?, loginToken: String, participations: List<Participation>,
+                        scope: CoroutineScope)
     {
         var date = DateTimeStrings.yMd_toCalendar(event.date, "-")!!
         val Hm = event.time.split(":")
@@ -244,12 +260,17 @@ class Keşfet
                 }
             },
             confirmButton = {
-                if (user?.id != event.organizerId) {
+                if (user?.id != event.organizerId && participations.none{ it.userId == user?.id }) {
                     TextButton(
                         onClick = {
-                            /*
-                            Buraya etkinliğe katılma özelliği gelecek
-                         */
+                            var new_part = Participation(
+                                userId = user!!.id,
+                                eventId = event.eventId,
+                                checkedIn = false
+                            )
+                            scope.launch {
+                                ParticipationRepository().addParticipation(new_part, loginToken)
+                            }
                             eventInfoDialogOpen.value = false
                         }
                     ) {

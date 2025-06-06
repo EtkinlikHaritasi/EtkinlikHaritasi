@@ -182,7 +182,9 @@ class MainActivity : ComponentActivity()
                             composable<KendimSayfası> {
                                 Kendim().İçerik(
                                     modifier = Modifier.padding(innerPadding),
-                                    user = user
+                                    user = user,
+                                    loginToken = loginToken,
+                                    database = DB
                                 )
                             }
                         }
