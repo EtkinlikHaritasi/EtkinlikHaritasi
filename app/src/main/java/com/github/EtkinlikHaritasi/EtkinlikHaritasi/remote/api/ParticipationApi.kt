@@ -21,6 +21,13 @@ interface ParticipationApi {
         @Query("auth") token: String
     ): Response<Map<String, Participation>>
 
+    @GET("participations/{user}_{event}.json")
+    suspend fun getParticipation(
+        @Path("user") userId: Int,
+        @Path("event") eventId: Int,
+        @Query("auth") token: String
+    ): Response<Participation>
+
     @PUT("participations/{user_event}.json")
     suspend fun createParticipation(
         @Body participation: Participation,

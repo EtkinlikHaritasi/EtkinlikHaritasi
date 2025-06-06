@@ -1,5 +1,6 @@
 package com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository
 
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.Event
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.Participation
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.remote.auth.RetrofitInstance
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.remote.api.ParticipationApi
@@ -15,6 +16,10 @@ class ParticipationRepository {
     }
     suspend fun getParticipationsByEvent(eventId: Int, token: String): List<Participation> {
         return api.getPartiticipationsByEvent(eventId, token).body()?.values?.toList().orEmpty()
+    }
+
+    suspend fun getParticipation(userId: Int, eventId: Int, token: String): Participation? {
+        return api.getParticipation(userId, eventId, token).body()
     }
 
     suspend fun addParticipation(participation: Participation, token: String) =

@@ -444,7 +444,7 @@ class Bilet
             Log.d("b", strl.size.toString())
         }
 
-        LaunchedEffect(discoveries) {
+        LaunchedEffect(discoveries.size) {
             Log.d("Discovery", "Girdi")
 
             var devices = discoveries.orEmpty()
@@ -452,19 +452,21 @@ class Bilet
             {
                 val searched_id = "${event.eventId}_${event.organizerId}"
                 val finding = devices.filter {
-                    it.serviceId == searched_id
+                    it.endpointName == searched_id
                 }
                 Log.d("Discovery", finding.size.toString())
 
                 if (finding.isNotEmpty())
                 {
-                    nearbyUtils.value?.sendData(finding[0].serviceId, ticketId)
+                    nearbyUtils.value?.sendData(finding[0].endpointName, ticketId)
+                    Log.d("Discovery", "Veri Gönderdim - ${finding[0].endpointName} - ${ticketId}")
                 }
             }
         }
 
         LaunchedEffect(receivedData.value) {
             var data = receivedData.value
+            Log.d("Advertise", data.toString())
             infoText.value = "Kontrol başlıyor..."
             var parted = data?.split("_").orEmpty()
             if (parted.size >= 2) {
