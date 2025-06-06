@@ -32,6 +32,8 @@ import com.github.EtkinlikHaritasi.EtkinlikHaritasi.R
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.SpeechRecognitionService
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 class Mikrofon {
 
     val açıkken_simge = Icons.Filled.SmartToy
@@ -204,7 +206,7 @@ class Mikrofon {
                         .fillMaxWidth()
                         .background(
                             color = colorResource(id = R.color.white),
-                            shape = CircleShape
+                            shape = RoundedCornerShape(12.dp)
                         )
                         .padding(16.dp)
                 ) {
