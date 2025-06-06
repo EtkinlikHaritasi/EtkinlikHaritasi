@@ -181,7 +181,7 @@ class SpeechRecognitionService : Service() {
             Kullanıcı  şöyle dedi: "$text"
             kullanıcıya etkinlikler veya aktiviteler öner  kısaca  kullanıcıyı ikna et .
             İşte mevcut etkinlikler: ve zamanları :
-            $eventTitles
+            ${events.toString()}
         """.trimIndent()
 
             prevcommand = text

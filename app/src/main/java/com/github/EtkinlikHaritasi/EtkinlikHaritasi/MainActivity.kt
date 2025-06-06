@@ -128,7 +128,8 @@ class MainActivity : ComponentActivity()
         LocationUtils.startContinuousLocationUpdates(this, fusedLocationProviderClient)
 
         checkAndRequestPermissions()
-        val loginToken=""
+        val loginToken = ""
+
 
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -196,7 +197,7 @@ class MainActivity : ComponentActivity()
                             }
                         }
                     }
-                    scheduleEventWorker(this,loginToken)
+
 
                 }
                 else
@@ -209,6 +210,7 @@ class MainActivity : ComponentActivity()
                 }
             }
         }
+        scheduleEventWorker(this,loginToken)
     }
 
 
