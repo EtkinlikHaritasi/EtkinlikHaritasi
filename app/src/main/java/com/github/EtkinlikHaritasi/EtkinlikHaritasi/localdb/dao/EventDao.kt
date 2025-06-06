@@ -18,6 +18,10 @@ interface EventDao {
     @Query("SELECT * FROM event_table ORDER BY eventId ASC")
     fun getAllEvents(): LiveData<List<Event>>
 
+    @Query("SELECT * FROM event_table")
+    suspend fun getAllEventsList(): List<Event>
+
+
     @Query("DELETE FROM event_table")
     suspend fun clearAll()
 

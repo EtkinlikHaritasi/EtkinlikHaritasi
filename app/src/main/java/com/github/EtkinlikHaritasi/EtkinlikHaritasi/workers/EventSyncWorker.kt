@@ -13,10 +13,8 @@ import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.database.AppDatabase
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.Event
 import java.text.SimpleDateFormat
 import java.util.Locale
-import android.app.PendingIntent
-import android.content.Intent
-
-
+import androidx.core.app.NotificationManagerCompat
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.R
 
 class EventSyncWorker(
     context: Context,
@@ -31,35 +29,60 @@ class EventSyncWorker(
 
     companion object {
         private var lastIds: Set<Int> = emptySet()
+        private const val NOTIFICATION_ID = 1001
+
     }
 
     override suspend fun doWork(): Result {
+        Log.d("EventSyncWorker", "Etkinlik senkronizasyonu başladı")
         return try {
             val token = inputData.getString("LOGIN_TOKEN")
 
-            val events = repository.getEvents(token.toString())
+            val remoteEvents = repository.getEvents(token.toString())
 
-            if (events == null) {
+            if (remoteEvents == null) {
                 showNotification("Etkinlik bilgileri alınamadı (boş veri)")
                 return Result.retry()
             }
 
-            val newIds = events.map { it.eventId }.toSet()
-            val diffCount = (newIds - lastIds).size
-            lastIds = newIds
+            val localEvents = repository.getLocalEvents()
+            val localIds = localEvents.map { it.eventId }.toSet()
+            Log.e("local events ", localEvents.toString())
 
-            if (diffCount > 0) {
-                showNotification("$diffCount yeni etkinlik bulundu")
+
+            val remoteIds = remoteEvents.map { it.eventId }.toSet()
+            Log.e("remote events ", remoteEvents.toString())
+
+            val newEventIds = remoteIds - localIds
+
+            if (newEventIds.isNotEmpty()) {
+                showNotification("${newEventIds.size} yeni etkinlik bulundu")
             }
+            else{
+                showNotification(" yeni etkinlik bulunmadı")
+                val eventTitles = remoteEvents?.joinToString("\n") { event: Event -> event.title } ?: "Etkinlik bulunamadı."
+
+                val builder = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
+                    .setContentTitle("Yakındaki Etkinlikler")
+                    .setSmallIcon(android.R.drawable.ic_dialog_info)
+                    .setStyle(NotificationCompat.BigTextStyle().bigText(eventTitles))
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+
+                with(NotificationManagerCompat.from(applicationContext)) {
+                    notify(NOTIFICATION_ID, builder.build())
+                }
+            }
+
+            val newEvents = remoteEvents.filter { it.eventId in newEventIds }
+            repository.insertEvents(newEvents)
 
             val now = System.currentTimeMillis()
             val oneHourMillis = 3600 * 1000L
-
             val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
 
-            events.forEach { event ->
+            remoteEvents.forEach { event ->
                 try {
-                    val eventDateTimeStr = "${event.date} ${event.time}" // "2025-06-01 14:00"
+                    val eventDateTimeStr = "${event.date} ${event.time}"
                     val eventTimeMillis = formatter.parse(eventDateTimeStr)?.time ?: return@forEach
 
                     val diff = eventTimeMillis - now
@@ -75,9 +98,10 @@ class EventSyncWorker(
         } catch (e: Exception) {
             Log.e("EventSyncWorker", "Exception in doWork", e)
             showNotification("Etkinlik bilgileri alınamadı")
-            return Result.retry()
+            Result.retry()
         }
     }
+
 
     private fun showNotification(message: String) {
         createChannelIfNeeded()
