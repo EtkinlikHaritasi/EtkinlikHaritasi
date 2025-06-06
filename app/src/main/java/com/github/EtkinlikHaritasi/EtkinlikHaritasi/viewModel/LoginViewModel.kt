@@ -15,6 +15,7 @@ class LoginViewModel(
         viewModelScope.launch {
             val token = repository.login(email, password)
             loginToken.value = token
+
         }
     }
 }

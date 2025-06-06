@@ -33,6 +33,8 @@ import com.github.EtkinlikHaritasi.EtkinlikHaritasi.SpeechRecognitionService
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.database.AppDatabase
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.User
 
 class Mikrofon {
 
@@ -41,7 +43,9 @@ class Mikrofon {
     val başlık = "Etkinlik asistanı"
 
     @Composable
-    fun İçerik(modifier: Modifier = Modifier) {
+    fun İçerik(modifier: Modifier = Modifier, user: MutableState<User?>, loginToken: String,
+               database: AppDatabase
+    ) {
         val context = LocalContext.current
         val activity = context as Activity
 
@@ -87,12 +91,12 @@ class Mikrofon {
             return
         }
 
-        MicScreen(modifier)
+        MicScreen(modifier,loginToken)
     }
 
 
     @Composable
-    private fun MicScreen(modifier: Modifier = Modifier) {
+    private fun MicScreen(modifier: Modifier = Modifier,loginToken: String,) {
         val context = LocalContext.current
         var speechText by remember { mutableStateOf("Mikrofon Açıldı") }
         var geminiResponseText by remember { mutableStateOf("Etkinlik Asistanı") }
@@ -131,7 +135,11 @@ class Mikrofon {
                 ContextCompat.RECEIVER_EXPORTED
             )
 
-            val serviceIntent = Intent(context, SpeechRecognitionService::class.java)
+//            val serviceIntent = Intent(context, SpeechRecognitionService::class.java)
+//            context.startService(serviceIntent)
+            val serviceIntent = Intent(context, SpeechRecognitionService::class.java).apply {
+                putExtra("LOGIN_TOKEN", loginToken)
+            }
             context.startService(serviceIntent)
 
             onDispose {
@@ -144,7 +152,7 @@ class Mikrofon {
         Column(
             modifier = modifier
                 .fillMaxSize()
-                .verticalScroll(scrollState) // ⭐️ Kaydırma eklendi
+                .verticalScroll(scrollState)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)

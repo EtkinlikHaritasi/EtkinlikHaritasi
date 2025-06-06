@@ -93,10 +93,15 @@ class MainActivity : ComponentActivity()
         }
     }
 
-    fun scheduleEventWorker(context: Context) {
+    fun scheduleEventWorker(context: Context,token: String) {
         Log.d("EventSyncWorker", "Worker başla")
+        val inputData = Data.Builder()
+            .putString("LOGIN_TOKEN", token)
+            .build()
 
-        val oneTimeRequest = OneTimeWorkRequestBuilder<EventSyncWorker>().build()
+        val oneTimeRequest = OneTimeWorkRequestBuilder<EventSyncWorker>()
+            .setInputData(inputData)
+            .build()
         WorkManager.getInstance(context).enqueue(oneTimeRequest)
 
         val periodicRequest = PeriodicWorkRequestBuilder<EventSyncWorker>(
@@ -116,7 +121,6 @@ class MainActivity : ComponentActivity()
     {
         val DB = AppDatabaseInstance.getDatabase(this)
 
-        scheduleEventWorker(this)
         fusedLocationProviderClient = LocationUtils.getFusedLocationProviderClient(this)
 
         LocationUtils.checkLocationPermission(this)
@@ -124,7 +128,7 @@ class MainActivity : ComponentActivity()
         LocationUtils.startContinuousLocationUpdates(this, fusedLocationProviderClient)
 
         checkAndRequestPermissions()
-
+        val loginToken=""
 
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -176,7 +180,10 @@ class MainActivity : ComponentActivity()
                             }
                             composable<MikrofonSayfası> {
                                 Mikrofon().İçerik(
-                                    modifier = Modifier.padding(innerPadding)
+                                    modifier = Modifier.padding(innerPadding),
+                                    user = user,
+                                    loginToken = loginToken,
+                                    database = DB
                                 )
                             }
                             composable<KendimSayfası> {
@@ -189,6 +196,8 @@ class MainActivity : ComponentActivity()
                             }
                         }
                     }
+                    scheduleEventWorker(this,loginToken)
+
                 }
                 else
                 {

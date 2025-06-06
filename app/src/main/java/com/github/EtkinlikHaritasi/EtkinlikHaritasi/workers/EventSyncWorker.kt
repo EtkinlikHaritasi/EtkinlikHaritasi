@@ -31,7 +31,10 @@ class EventSyncWorker(
 
     override suspend fun doWork(): Result {
         return try {
-            val events = listOf<Event>()//repository.getAllEventsList()
+            val token = inputData.getString("LOGIN_TOKEN")
+
+            val events = repository.getEvents(token.toString())
+
             if (events == null) {
                 showNotification("Etkinlik bilgileri alınamadı (boş veri)")
                 return Result.retry()
