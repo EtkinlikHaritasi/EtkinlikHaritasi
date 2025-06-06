@@ -23,9 +23,11 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusEvent
@@ -64,7 +66,8 @@ class Keşfet
 
     @ExperimentalMaterial3Api
     @Composable
-    fun İçerik(modifier: Modifier = Modifier, user: MutableState<User?>)
+    fun İçerik(modifier: Modifier = Modifier, user: MutableState<User?>,
+               loginToken: String, database: AppDatabase)
     {
         val context = LocalContext.current
         val fusedLocationProviderClient = remember {
@@ -75,17 +78,31 @@ class Keşfet
         var locationGotClicked = remember { mutableStateOf(false) }
         var clickedLocation = remember { mutableStateOf(focus_location) }
         var events = remember { mutableStateOf<List<Event>?>(null) }
+        var participations by remember {
+            mutableStateOf<List<Participation>>(emptyList<Participation>())
+        }
         var eventInfoDialogOpen = remember { mutableStateOf(false) }
         var clickedEvent = remember { mutableStateOf<Event?>(null) }
 
         val scope = rememberCoroutineScope()
         val snackbarHostState = remember { SnackbarHostState() }
 
-        var db = AppDatabaseInstance.getDatabase(context)
 
         LifecycleEventEffect(Lifecycle.Event.ON_START) {
             scope.launch {
-                //EventRepository(db.eventDao()).refreshEventsFromApi()
+                var eventRepo = EventRepository(database.eventDao())
+                eventRepo.refreshEventsFromApi(loginToken)
+
+                events.value = eventRepo.getEvents(loginToken)?.filter {
+                    var cal = DateTimeStrings.CalendarOfEvent(it)
+                    cal != null && cal > Calendar.getInstance()
+                }?.sortedBy {
+                    DateTimeStrings.CalendarOfEvent(it)
+                }
+                                //database.eventDao().getAllEvents().value
+
+                var participationRepo = ParticipationRepository()
+                participations = participationRepo.getParticipationsByUser(user.value!!.id, loginToken)
             }
         }
 
@@ -112,17 +129,12 @@ class Keşfet
                                     )
                                 }
                             }
-                            item {
-                                Row() {
-                                    Icon(Icons.Filled.AcUnit, contentDescription = "kar tanesi")
-                                    Text(text = "Lorem Ipsum", style = Typography.titleMedium)
-                                }
-                            }
-                            item {
-                                Row() {
-                                    Icon(Icons.Filled.Gavel, contentDescription = "tokmak")
-                                    Text(text = "Dolor Sit Amet", style = Typography.titleMedium)
-                                }
+                            items(events.value.orEmpty().size) { i ->
+                                EventListRow(
+                                    event = events.value!![i],
+                                    clickedEvent = clickedEvent,
+                                    eventInfoDialogOpen = eventInfoDialogOpen
+                                )
                             }
                         }
                     }
@@ -148,18 +160,8 @@ class Keşfet
                     onMapLongClick = { selection ->
                         locationGotClicked.value = true
                         clickedLocation.value = selection
-                        /*scope.launch {
-                            snackbarHostState.showSnackbar(
-                                message = "lat: ${selection.latitude}, lon: ${selection.longitude}",
-                                duration = SnackbarDuration.Short
-                            )
-                        }*/
                     },
-                    onMapLoaded = {
-                        //scope.launch {
-                            //events.value = EventRepository(db.eventDao()).getAllEventsList()
-                        //}
-                    }
+                    onMapLoaded = { }
                 )
                 {
                     if (events.value != null)
@@ -181,25 +183,31 @@ class Keşfet
                             )
                         }
                     }
-                    /*AdvancedMarker(
-                        state = rememberUpdatedMarkerState(LatLng(40.0, 30.0)),
-                        contentDescription = "Açıklama",
-                        draggable = false,
-                        tag = "Etiket",
-                        title = "Başlık",
-                        snippet = "Çevirisi Aklımda Değil"
-                    )*/
                 }
 
                 if (eventInfoDialogOpen.value && clickedEvent.value != null)
                 {
-                    EtkinlikBilgisi(clickedEvent.value!!, eventInfoDialogOpen)
+                    EtkinlikBilgisi(
+                        event = clickedEvent.value!!,
+                        eventInfoDialogOpen = eventInfoDialogOpen,
+                        user =  user.value,
+                        loginToken =  loginToken,
+                        participations = participations,
+                        scope = scope
+                    )
                 }
 
                 if (locationGotClicked.value)
                 {
-                    YeniEtkinlikOluşturucu(clickedLocation.value, locationGotClicked, db, scope,
-                        user)
+                    YeniEtkinlikOluşturucu(
+                        konum = clickedLocation.value,
+                        locationGotClicked = locationGotClicked,
+                        db = database,
+                        scope = scope,
+                        user = user,
+                        loginToken = loginToken,
+                        events = events
+                    )
                 }
 
             }
@@ -209,7 +217,9 @@ class Keşfet
     }
 
     @Composable
-    fun EtkinlikBilgisi(event: Event, eventInfoDialogOpen: MutableState<Boolean>)
+    fun EtkinlikBilgisi(event: Event, eventInfoDialogOpen: MutableState<Boolean>,
+                        user: User?, loginToken: String, participations: List<Participation>,
+                        scope: CoroutineScope)
     {
         var date = DateTimeStrings.yMd_toCalendar(event.date, "-")!!
         val Hm = event.time.split(":")
@@ -250,15 +260,22 @@ class Keşfet
                 }
             },
             confirmButton = {
-                TextButton(
-                    onClick = {
-                        /*
-                            Buraya etkinliğe katılma özelliği gelecek
-                         */
-                        eventInfoDialogOpen.value = false
+                if (user?.id != event.organizerId && participations.none{ it.userId == user?.id }) {
+                    TextButton(
+                        onClick = {
+                            var new_part = Participation(
+                                userId = user!!.id,
+                                eventId = event.eventId,
+                                checkedIn = false
+                            )
+                            scope.launch {
+                                ParticipationRepository().addParticipation(new_part, loginToken)
+                            }
+                            eventInfoDialogOpen.value = false
+                        }
+                    ) {
+                        Text(text = "Katıl")
                     }
-                ) {
-                    Text(text = "Katıl")
                 }
             },
             properties = DialogProperties(
@@ -271,7 +288,8 @@ class Keşfet
     @ExperimentalMaterial3Api
     @Composable
     fun YeniEtkinlikOluşturucu(konum: LatLng, locationGotClicked: MutableState<Boolean>,
-                               db: AppDatabase, scope: CoroutineScope, user: MutableState<User?>)
+                               db: AppDatabase, scope: CoroutineScope, user: MutableState<User?>,
+                               loginToken: String, events: MutableState<List<Event>?>)
     {
         var ad = remember { mutableStateOf("") }
         var açıklama = remember { mutableStateOf("") }
@@ -282,6 +300,7 @@ class Keşfet
         var showDatePicker = remember { mutableStateOf(false) }
         var showTimePicker = remember { mutableStateOf(false) }
 
+        var eventRepo = EventRepository(db.eventDao())
 
         Dialog(
             onDismissRequest = {
@@ -456,7 +475,7 @@ class Keşfet
                                 {
                                     if (ad.value.isNotBlank() && açıklama.value.isNotBlank())
                                     {
-                                        var yeni_etkinlik = Event(
+                                        var new_event = Event(
                                             eventId = SecureRandom().nextInt(),
                                             title = ad.value,
                                             description = açıklama.value,
@@ -468,7 +487,9 @@ class Keşfet
                                         )
 
                                         scope.launch {
-                                            //var a = EventRepository(db.eventDao()).addEvent(yeni_etkinlik)
+                                            eventRepo.addEvent(new_event, loginToken)
+                                            eventRepo.refreshEventsFromApi(loginToken)
+                                            events.value = eventRepo.getEvents(loginToken)
                                         }
                                     }
                                 }
@@ -570,5 +591,47 @@ class Keşfet
         return false
     }
 
-
+    @Composable
+    fun EventListRow(event: Event, clickedEvent: MutableState<Event?>,
+                     eventInfoDialogOpen: MutableState<Boolean>)
+    {
+        var cal = DateTimeStrings.CalendarOfEvent(event)
+        Row (
+            modifier = Modifier.fillMaxWidth().padding(16.dp)
+        ) {
+            TextButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    clickedEvent.value = event
+                    eventInfoDialogOpen.value = true
+                },
+                shape = RoundedCornerShape(4.dp)
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = event.title,
+                        style = Typography.titleLarge,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                    Text(
+                        text = event.description,
+                        style = Typography.bodyLarge,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                    Text(
+                        text = DateTimeStrings.dMyHms(cal!!, ".", ".", " "),
+                        style = Typography.labelLarge,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                    Text(
+                        text = "Konum: ${event.lat}, ${event.lng}",
+                        style = Typography.labelMedium,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                }
+            }
+        }
+    }
 }

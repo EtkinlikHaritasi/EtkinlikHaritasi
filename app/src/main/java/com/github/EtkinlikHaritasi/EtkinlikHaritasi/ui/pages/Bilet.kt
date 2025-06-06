@@ -33,7 +33,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusModifier
@@ -48,9 +50,16 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.Connectivity.NearbyDeviceUtils
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.DateTimeStrings
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.Sensor.QrUtils
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.database.AppDatabase
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.Event
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.Participation
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.User
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.EventRepository
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.ParticipationRepository
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.ui.theme.Typography
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.utils.FileUtils
+import kotlinx.coroutines.launch
 import java.util.Calendar
 
 class Bilet
@@ -125,22 +134,41 @@ class Bilet
         )
     }
 
+    @ExperimentalGetImage
     @Composable
-    fun İçerik(modifier: Modifier, user: MutableState<User?>)
+    fun İçerik(modifier: Modifier, user: MutableState<User?>,
+               loginToken: String, database: AppDatabase)
     {
         if (LocalActivity.current == null)
             return
 
         var activity = LocalActivity.current as Activity
         var context = LocalContext.current
+        val scope = rememberCoroutineScope()
 
         var isTicketController = remember { mutableStateOf<Boolean?>(null) }
         var onParOrOrgScreen = remember { mutableStateOf(true) }
         var nearbyUtils = remember { mutableStateOf<NearbyDeviceUtils?>(null) }
 
-        var allEvents: List<Event> = placeholderEvents()
+        var allEvents by remember { mutableStateOf<List<Event>>(emptyList<Event>()) }
+        var participations by remember {
+            mutableStateOf<List<Participation>>(emptyList<Participation>())
+        }
 
         var selectedEvent = remember { mutableStateOf<Event?>(null) }
+        var norqNearby = remember { mutableStateOf<Boolean?>(null) }
+
+        LifecycleEventEffect(Lifecycle.Event.ON_START) {
+            scope.launch {
+                var eventRepo = EventRepository(database.eventDao())
+                eventRepo.refreshEventsFromApi(loginToken)
+                allEvents = eventRepo.getEvents(loginToken).orEmpty()
+                    //database.eventDao().getAllEvents().value
+
+                var participationRepo = ParticipationRepository()
+                participations = participationRepo.getParticipationsByUser(user.value!!.id, loginToken)
+            }
+        }
 
         if (onParOrOrgScreen.value)
         {
@@ -165,30 +193,198 @@ class Bilet
                     isTicketController = isTicketController,
                     onParOrOrgScreen = onParOrOrgScreen,
                     allEvents = allEvents,
-                    selectedEvent = selectedEvent
+                    selectedEvent = selectedEvent,
+                    participations = participations
                 )
             }
             else
             {
-                NorQ(
-                    modifier = modifier,
-                    user = user,
-                    activity = activity,
-                    context = context,
-                    isTicketController = isTicketController,
-                    onParOrOrgScreen = onParOrOrgScreen,
-                    selectedEvent = selectedEvent,
-                    nearbyUtils = nearbyUtils
-                )
+                if (norqNearby.value == null)
+                {
+                    NorQ(
+                        modifier = modifier,
+                        user = user.value!!,
+                        activity = activity,
+                        context = context,
+                        isTicketController = isTicketController,
+                        onParOrOrgScreen = onParOrOrgScreen,
+                        selectedEvent = selectedEvent,
+                        norqNearby = norqNearby
+                    )
+                }
+                else
+                {
+                    FinalStep(
+                        modifier = modifier,
+                        user = user.value!!,
+                        loginToken = loginToken,
+                        activity = activity,
+                        context = context,
+                        isTicketController = isTicketController,
+                        onParOrOrgScreen = onParOrOrgScreen,
+                        selectedEvent = selectedEvent,
+                        nearbyUtils = nearbyUtils,
+                        norqNearby = norqNearby
+                    )
+                }
+            }
+        }
+    }
+
+
+    @ExperimentalGetImage
+    @Composable
+    fun FinalStep(modifier: Modifier, user: User, loginToken: String,
+                  activity: Activity, context: Context, isTicketController: MutableState<Boolean?>,
+                  onParOrOrgScreen: MutableState<Boolean>, selectedEvent: MutableState<Event?>,
+                  nearbyUtils: MutableState<NearbyDeviceUtils?>, norqNearby: MutableState<Boolean?>)
+    {
+        val permissionLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission()
+        ) {}
+        var permissionGranted by remember { mutableStateOf(false) }
+
+        val defaultInfo = "Bilet Kontrol"
+        var infoText by remember { mutableStateOf<String>(defaultInfo) }
+
+        val ticketId: String = "${selectedEvent.value?.eventId}_${user.id}"
+        var QResult by remember { mutableStateOf<String?>(null) }
+
+        LaunchedEffect(QResult) {
+            if (!QResult.isNullOrBlank())
+            {
+                infoText = "Kontrol başlıyor..."
+                var parted = QResult?.split("_").orEmpty()
+                if (parted.size >= 2)
+                {
+                    if (parted[0].toIntOrNull() == selectedEvent.value!!.eventId)
+                    {
+                        var partRepo = ParticipationRepository()
+                        val tbu = partRepo.getParticipationsByEvent(
+                            selectedEvent.value!!.eventId, loginToken).filter {
+                            it.userId == parted[1].toIntOrNull() && it.checkedIn == false
+                        }
+                        if (tbu.isNotEmpty())
+                        {
+                            var updated = Participation(
+                                eventId = tbu[0].eventId,
+                                userId = tbu[0].userId,
+                                checkedIn = true
+                            )
+                            if (partRepo.updateParticipation(
+                                userId = updated.userId,
+                                eventId = updated.eventId,
+                                participation = updated,
+                                token = loginToken
+                            ).isSuccessful) {
+                                Log.d("Event Ticket", "${ticketId} girişi yapıldı.")
+                                infoText = "Giriş Yapıldı"
+                            }
+                            else {
+                                infoText = "Kontrol Başarısız"
+                            }
+                        }
+                        else {
+                            infoText = "Kayıt Bulunamadı"
+                        }
+                    }
+                    else {
+                        infoText = "Bilet Farklı Etkinlik İçin"
+                    }
+                }
+                else {
+                    infoText = "QR hatalı"
+                }
+            }
+        }
+
+        Scaffold (
+            modifier = modifier,
+            topBar = {
+                Box (
+                    modifier = Modifier.fillMaxWidth().padding(12.dp)
+                ) {
+                    IconButton(
+                        modifier = Modifier.align(Alignment.CenterStart),
+                        onClick = {
+                            norqNearby.value = null
+                        }
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Outlined.ArrowBack,
+                            contentDescription = "Geri Düğmesi"
+                        )
+                    }
+                    Text(
+                        text = "${selectedEvent.value?.title}",
+                        style = Typography.headlineLarge,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            },
+            bottomBar = {
+                Box (
+                    modifier = Modifier.fillMaxWidth().padding(12.dp)
+                ) {
+                    Text(
+                        text = infoText,
+                        style = Typography.headlineLarge,
+                        modifier = Modifier.align(Alignment.TopCenter)
+                    )
+                }
+            }
+        ) { paddingValues ->
+            Box(
+                modifier = Modifier.fillMaxSize().padding(paddingValues)
+            ) {
+
+                if (norqNearby.value == true) {
+                    Column (
+                        modifier = Modifier.fillMaxSize(0.7f).align(Alignment.Center)
+                    ) {
+                        Icon(
+                            Icons.Outlined.Contactless,
+                            contentDescription = "Sensör simgesi",
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                                .fillMaxSize(0.45f)
+                        )
+                        Text(
+                            text = "Yakındaki Cihazlar",
+                            style = Typography.headlineLarge
+                        )
+                    }
+                }
+                else if (isTicketController.value == true) {
+                    permissionGranted = ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.CAMERA
+                    ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
+                    if (permissionGranted && QResult == null) {
+                        Box (
+                            modifier = Modifier.fillMaxSize(0.9f).align(Alignment.Center)
+                                .clip(RoundedCornerShape(28.dp))
+                        ) {
+                            QRCodeScanner { result ->
+                                QResult = result
+                                Log.d("QR Scanner", result)
+                            }
+                        }
+                    }
+                    else {
+                        permissionLauncher.launch(Manifest.permission.CAMERA)
+                    }
+                }
             }
         }
     }
 
     @Composable
-    fun NorQ(modifier: Modifier, user: MutableState<User?>, activity: Activity, context: Context,
+    fun NorQ(modifier: Modifier, user: User, activity: Activity, context: Context,
              isTicketController: MutableState<Boolean?>, onParOrOrgScreen: MutableState<Boolean>,
-             selectedEvent: MutableState<Event?>, nearbyUtils: MutableState<NearbyDeviceUtils?>)
+             selectedEvent: MutableState<Event?>, norqNearby: MutableState<Boolean?>)
     {
+        val ticketId: String = "${selectedEvent.value?.eventId}_${user.id}"
         Scaffold (
             modifier = modifier,
             topBar = {
@@ -225,26 +421,7 @@ class Bilet
                     TextButton(
                         modifier = Modifier.fillMaxSize(0.7f).align(Alignment.Center),
                         onClick = {
-                            /*
-                            if (selectedEvent.value != null) {
-                                nearbyUtils.value = NearbyDeviceUtils(
-                                    context = context,
-                                    deviceName = "${selectedEvent.value?.eventId}-${user.value.id}"
-                                )
-                                if (isTicketController.value == true)
-                                {
-                                    nearbyUtils.value?.startAdvertising()
-                                }
-                                else if (isTicketController.value == false)
-                                {
-                                    nearbyUtils.value?.startDiscovery()
-                                }
-                                else
-                                {
-                                    nearbyUtils.value = null
-                                }
-                            }
-                             */
+                            norqNearby.value = true
                         },
                         contentPadding = PaddingValues(0.dp),
                         shape = RoundedCornerShape(20.dp)
@@ -269,7 +446,43 @@ class Bilet
                 {
                     TextButton(
                         modifier = Modifier.fillMaxSize(0.7f).align(Alignment.Center),
-                        onClick = {  },
+                        onClick = {
+                            if (isTicketController.value == false) {
+                                val ticketQR = QrUtils.generateQrCode(ticketId)
+                                if (ticketQR != null) {
+                                    val downloaded = FileUtils.saveBitmapAsPng(
+                                        context = context,
+                                        bitmap = ticketQR,
+                                        fileName = "Bilet__${ticketId}"
+                                    )
+                                    if (downloaded) {
+                                        Toast.makeText(
+                                            context,
+                                            "Biletiniz Pictures/QRCode dizinine indirildi.",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                                    else {
+                                        Toast.makeText(
+                                            context,
+                                            "HATA: QR kod indirilemedi.",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                                }
+                                else {
+                                    Toast.makeText(
+                                        context,
+                                        "HATA: QR kod oluşturulamadı.",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                                onParOrOrgScreen.value = true
+                            }
+                            else {
+                                norqNearby.value = false
+                            }
+                        },
                         contentPadding = PaddingValues(0.dp),
                         shape = RoundedCornerShape(20.dp)
                     ) {
@@ -293,17 +506,20 @@ class Bilet
     @Composable
     fun EveSel(modifier: Modifier, user: MutableState<User?>, activity: Activity, context: Context,
                isTicketController: MutableState<Boolean?>, onParOrOrgScreen: MutableState<Boolean>,
-               allEvents: List<Event>, selectedEvent: MutableState<Event?>)
+               allEvents: List<Event>, selectedEvent: MutableState<Event?>,
+               participations: List<Participation>)
     {
         if (isTicketController.value == null)
             onParOrOrgScreen.value = true
 
-        var events = allEvents.filter {
-            var cal = DateTimeStrings.CalendarOfEvent(event = it)
+        var events = allEvents.filter { event ->
+            var cal = DateTimeStrings.CalendarOfEvent(event = event)
             cal != null
                     && cal >= Calendar.getInstance()
-                    && if (isTicketController.value!!) it.organizerId == user.value?.id
-                    else it.organizerId != user.value?.id
+                    && if (isTicketController.value!!) (event.organizerId == user.value?.id &&
+                        participations.none { it.eventId == event.eventId })
+                    else (event.organizerId != user.value?.id && participations.any {
+                        it.eventId == event.eventId && !it.checkedIn })
         }.sortedBy {
             DateTimeStrings.CalendarOfEvent(event = it)
         }

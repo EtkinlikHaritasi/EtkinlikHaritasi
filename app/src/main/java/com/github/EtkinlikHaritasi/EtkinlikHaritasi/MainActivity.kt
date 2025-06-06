@@ -44,6 +44,7 @@ import androidx.work.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.Connectivity.NearbyDeviceUtils
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.database.AppDatabaseInstance
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.User
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.LoginRepository
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.RegisterRepository
@@ -51,6 +52,7 @@ import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.UserRepository
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.viewModel.RegisterViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.workers.EventSyncWorker
+import kotlinx.coroutines.CoroutineScope
 
 
 @Serializable
@@ -112,6 +114,8 @@ class MainActivity : ComponentActivity()
     @ExperimentalGetImage
     override fun onCreate(savedInstanceState: Bundle?)
     {
+        val DB = AppDatabaseInstance.getDatabase(this)
+
         scheduleEventWorker(this)
         fusedLocationProviderClient = LocationUtils.getFusedLocationProviderClient(this)
 
@@ -139,6 +143,7 @@ class MainActivity : ComponentActivity()
                 if (loginViewModel.loginToken.value != null && user.value != null)
                 {
                     val navController = rememberNavController()
+                    val loginToken = loginViewModel.loginToken.value!!
 
                     Scaffold(
                         modifier = Modifier.fillMaxSize(),
@@ -151,7 +156,10 @@ class MainActivity : ComponentActivity()
                             composable<KeşfetSayfası> {
                                 Keşfet().İçerik(
                                     modifier = Modifier.padding(innerPadding),
-                                    user = user)
+                                    user = user,
+                                    loginToken = loginToken,
+                                    database = DB
+                                )
                             }
                             composable<RobotSayfası> {
                                 Robot().İçerik(
@@ -161,7 +169,9 @@ class MainActivity : ComponentActivity()
                             composable<BiletSayfası> {
                                 Bilet().İçerik(
                                     modifier = Modifier.padding(innerPadding),
-                                    user = user
+                                    user = user,
+                                    loginToken = loginToken,
+                                    database = DB
                                 )
                             }
                             composable<MikrofonSayfası> {
@@ -172,7 +182,9 @@ class MainActivity : ComponentActivity()
                             composable<KendimSayfası> {
                                 Kendim().İçerik(
                                     modifier = Modifier.padding(innerPadding),
-                                    user = user
+                                    user = user,
+                                    loginToken = loginToken,
+                                    database = DB
                                 )
                             }
                         }
