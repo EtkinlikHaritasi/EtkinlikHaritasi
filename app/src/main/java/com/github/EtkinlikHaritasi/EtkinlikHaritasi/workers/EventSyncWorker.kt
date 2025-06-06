@@ -34,8 +34,12 @@ class EventSyncWorker(
     }
 
     override suspend fun doWork(): Result {
+        val prefs = applicationContext.getSharedPreferences("prefs", Context.MODE_PRIVATE)
+        val token = prefs.getString("LOGIN_TOKEN", null)
+        Log.d("WorkerToken", "Token from SharedPreferences: $token")
+
         Log.d("EventSyncWorker", "Etkinlik senkronizasyonu başladı")
-        val token = inputData.getString("LOGIN_TOKEN")
+        //val token = inputData.getString("LOGIN_TOKEN")
         Log.e("token ", token.toString())
         return try {
 

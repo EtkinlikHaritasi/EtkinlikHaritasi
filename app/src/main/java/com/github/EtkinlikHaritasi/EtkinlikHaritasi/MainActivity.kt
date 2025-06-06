@@ -94,6 +94,9 @@ class MainActivity : ComponentActivity()
     }
 
     fun scheduleEventWorker(context: Context,token: String) {
+
+        val prefs = context.getSharedPreferences("prefs", Context.MODE_PRIVATE)
+        prefs.edit().putString("LOGIN_TOKEN", token).apply()
         Log.d("EventSyncWorker", "Worker başla")
         val inputData = Data.Builder()
             .putString("LOGIN_TOKEN", token)
@@ -106,10 +109,13 @@ class MainActivity : ComponentActivity()
 
 
 
-        val periodicRequest = PeriodicWorkRequestBuilder<EventSyncWorker>(15, TimeUnit.MINUTES)
-            .setInputData(inputData)
+        val periodicInputData = Data.Builder()
+            .putString("LOGIN_TOKEN", token)
             .build()
 
+        val periodicRequest = PeriodicWorkRequestBuilder<EventSyncWorker>(15, TimeUnit.MINUTES)
+            .setInputData(periodicInputData)
+            .build()
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             "event_sync_worker",
             ExistingPeriodicWorkPolicy.KEEP,
