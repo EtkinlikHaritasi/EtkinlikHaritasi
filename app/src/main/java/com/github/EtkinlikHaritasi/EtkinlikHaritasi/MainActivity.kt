@@ -80,7 +80,7 @@ class MainActivity : ComponentActivity()
         Manifest.permission.BLUETOOTH_SCAN,
         Manifest.permission.BLUETOOTH_ADVERTISE,
         Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.NEARBY_WIFI_DEVICES // Burası tekrar ele alınacak
+        Manifest.permission.NEARBY_WIFI_DEVICES // Burası tekrar  ele alınacak
     )
 
     private fun checkAndRequestPermissions() {
