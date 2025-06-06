@@ -37,6 +37,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusModifier
@@ -458,27 +459,29 @@ class Bilet
 
                 if (finding.isNotEmpty())
                 {
-                    nearbyUtils.value?.sendData(finding[0].endpointName, ticketId)
+                    nearbyUtils.value?.sendData(finding.last().endpointName, ticketId)
                     Log.d("Discovery", "Veri Gönderdim - ${finding[0].endpointName} - ${ticketId}")
                 }
             }
         }
 
         LaunchedEffect(receivedData.value) {
-            var data = receivedData.value
+
+            var data = receivedData.value//nearbyUtils.value?.recievedData?.value
+
             Log.d("Advertise", data.toString())
+            Log.d("Advertise",nearbyUtils.value?.recievedData?.value.toString())
             infoText.value = "Kontrol başlıyor..."
             var parted = data?.split("_").orEmpty()
             if (parted.size >= 2) {
-                if (parted[0].toIntOrNull() == event.eventId)
-                {
+                if (parted[0].toIntOrNull() == event.eventId) {
                     var partRepo = ParticipationRepository()
                     val tbu = partRepo.getParticipationsByEvent(
-                        event.eventId, loginToken).filter {
+                        event.eventId, loginToken
+                    ).filter {
                         it.userId == parted[1].toIntOrNull()
                     }
-                    if (tbu.isNotEmpty())
-                    {
+                    if (tbu.isNotEmpty()) {
                         if (!tbu[0].checkedIn) {
                             var updated = Participation(
                                 eventId = tbu[0].eventId,
@@ -497,22 +500,26 @@ class Bilet
                             } else {
                                 infoText.value = "Kontrol Başarısız"
                             }
-                        }
-                        else {
+                        } else {
                             infoText.value = "Zaten Giriş Yapılmış"
                         }
-                    }
-                    else {
+                    } else {
                         infoText.value = "Kayıt Bulunamadı"
                     }
-                }
-                else {
+                } else {
                     infoText.value = "Bilet Farklı Etkinlik İçin"
                 }
-            }
-            else if (data != null) {
+            } else if (data != null) {
                 infoText.value = "Bilet hatalı"
             }
+        }
+
+        Button(
+            onClick = {
+                receivedData.value += "a"
+            }
+        ) {
+            Text("aa")
         }
     }
 

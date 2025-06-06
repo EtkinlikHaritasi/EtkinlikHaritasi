@@ -31,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -48,6 +49,7 @@ import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.*
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.database.*
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.ui.theme.Typography
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.*
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.utils.DirectionApi
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -86,6 +88,9 @@ class Keşfet
 
         val scope = rememberCoroutineScope()
         val snackbarHostState = remember { SnackbarHostState() }
+
+        var routePoints = remember { mutableStateOf(listOf<LatLng>()) }
+        var routeShownBool = remember { mutableStateOf(false) }
 
 
         LifecycleEventEffect(Lifecycle.Event.ON_START) {
@@ -152,10 +157,9 @@ class Keşfet
                         position = CameraPosition.fromLatLngZoom(focus_location, 11.0f)
                     },
                     onMyLocationButtonClick = {
-                        konumum_düğmesi(
-                            context,
-                            fusedLocationProviderClient
-                        )
+                        routePoints.value = emptyList<LatLng>()
+                        routeShownBool.value = false
+                        false
                     },
                     onMapLongClick = { selection ->
                         locationGotClicked.value = true
@@ -182,6 +186,15 @@ class Keşfet
                                 }
                             )
                         }
+
+                        if(routeShownBool.value)
+                        {
+                            Polyline(
+                                points = routePoints.value,
+                                color = Color.Blue,
+                                width = 8f
+                            )
+                        }
                     }
                 }
 
@@ -193,7 +206,10 @@ class Keşfet
                         user =  user.value,
                         loginToken =  loginToken,
                         participations = participations,
-                        scope = scope
+                        context = context,
+                        scope = scope,
+                        routePoints = routePoints,
+                        routeShown = routeShownBool
                     )
                 }
 
@@ -219,7 +235,8 @@ class Keşfet
     @Composable
     fun EtkinlikBilgisi(event: Event, eventInfoDialogOpen: MutableState<Boolean>,
                         user: User?, loginToken: String, participations: List<Participation>,
-                        scope: CoroutineScope)
+                        context: Context, scope: CoroutineScope,
+                        routePoints: MutableState<List<LatLng>>, routeShown: MutableState<Boolean>)
     {
         var date = DateTimeStrings.yMd_toCalendar(event.date, "-")!!
         val Hm = event.time.split(":")
@@ -245,6 +262,29 @@ class Keşfet
                         readOnly = true,
                         label = { Text("Tarih") }
                     )
+                    FilledTonalButton(
+                        modifier = Modifier.fillMaxWidth(0.9f).align(Alignment.CenterHorizontally)
+                            .padding(6.dp),
+                        onClick = {
+                            val location_latitude = LocationUtils.lastKnownLocation!!.latitude;
+                            val location_longtitude = LocationUtils.lastKnownLocation!!.longitude;
+                            val destination_latitude = event.lat;
+                            val destination_longtitude = event.lng;
+
+                            scope.launch{
+                                routePoints.value = DirectionApi.fetchRoutePoints(
+                                    context.applicationInfo.metaData
+                                        .getString("com.google.android.geo.API_KEY")!!,
+                                    LatLng(location_latitude, location_longtitude),
+                                    LatLng(destination_latitude, destination_longtitude))
+                                routeShown.value = true
+                                eventInfoDialogOpen.value = false
+                            }
+
+                        }
+                    ) {
+                        Text(text = "Git")
+                    }
                 }
             },
             onDismissRequest = {
