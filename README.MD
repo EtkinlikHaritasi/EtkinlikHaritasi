@@ -85,7 +85,8 @@ proje ödevi olarak geliştirilmektedir.
     Daha önceden eklenmiş etkinlikler haritada görüntüleniyor.  
 
 5. Hafta: Giriş ve kayıt için kullanıcı arayüzü yapıldı.
-    QR bilet özellikleri tamamlandı.
+    Bilet özellikleri tamamlandı. Etkinliğe katılıp ayrılma ve yol tarifi
+    özellikleri eklendi.
 
 ### Background Process / Task
 

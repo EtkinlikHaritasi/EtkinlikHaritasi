@@ -404,11 +404,11 @@ class Bilet
                       nearbyUtils: MutableState<NearbyDeviceUtils?>, infoText: MutableState<String>)
     {
         val deviceName = "${event.eventId}_${user.id}"
-        var discoveries = remember { mutableStateListOf<DiscoveredEndpointInfo>() }
         var receivedData = remember { mutableStateOf<String?>(null) }
-        var strl = remember { mutableStateListOf<String>() }
+        var connected = remember { mutableStateOf<Boolean>(false) }
+        var endpoint = remember { mutableStateOf<String?>(null) }
         nearbyUtils.value = NearbyDeviceUtils(context = context, deviceName = deviceName,
-                discoveries = discoveries, str = strl, recievedData = receivedData)
+                connected = connected, endpoint = endpoint, recievedData = receivedData)
 
         LifecycleEventEffect(Lifecycle.Event.ON_START) {
             if (isTicketController == true) {
@@ -427,47 +427,29 @@ class Bilet
         }
 
         LifecycleEventEffect(Lifecycle.Event.ON_PAUSE) {
-            if (isTicketController == true) {
-                Nearby.getConnectionsClient(context).stopAdvertising()
-            } else {
-                Nearby.getConnectionsClient(context).stopDiscovery()
-            }
+            Nearby.getConnectionsClient(context).stopAdvertising()
+            Nearby.getConnectionsClient(context).stopDiscovery()
         }
         LifecycleEventEffect(Lifecycle.Event.ON_STOP) {
-            if (isTicketController == true) {
-                Nearby.getConnectionsClient(context).stopAdvertising()
-            } else {
-                Nearby.getConnectionsClient(context).stopDiscovery()
-            }
+            Nearby.getConnectionsClient(context).stopAdvertising()
+            Nearby.getConnectionsClient(context).stopDiscovery()
         }
 
-        LaunchedEffect(strl) {
-            Log.d("b", strl.size.toString())
-        }
-
-        LaunchedEffect(discoveries.size) {
-            Log.d("Discovery", "Girdi")
-
-            var devices = discoveries.orEmpty()
-            if (devices.isNotEmpty() && isTicketController != true)
+        LaunchedEffect(connected.value, endpoint.value) {
+            Log.d("Discovery", "g - ${connected.value}")
+            Log.d("Discovery", "g - ${endpoint.value}")
+            if (connected.value && endpoint.value != null && isTicketController != true)
             {
-                val searched_id = "${event.eventId}_${event.organizerId}"
-                val finding = devices.filter {
-                    it.endpointName == searched_id
-                }
-                Log.d("Discovery", finding.size.toString())
-
-                if (finding.isNotEmpty())
-                {
-                    nearbyUtils.value?.sendData(finding.last().endpointName, ticketId)
-                    Log.d("Discovery", "Veri Gönderdim - ${finding[0].endpointName} - ${ticketId}")
-                }
+                Log.d("Discovery", "Bıktım")
+                nearbyUtils.value?.sendData(endpoint.value!!, ticketId)
+                Log.d("Discovery", "Veri Gönderdim - ${endpoint.value!!} - ${ticketId}")
             }
         }
+
 
         LaunchedEffect(receivedData.value) {
 
-            var data = receivedData.value//nearbyUtils.value?.recievedData?.value
+            var data = receivedData.value
 
             Log.d("Advertise", data.toString())
             Log.d("Advertise",nearbyUtils.value?.recievedData?.value.toString())
@@ -512,14 +494,6 @@ class Bilet
             } else if (data != null) {
                 infoText.value = "Bilet hatalı"
             }
-        }
-
-        Button(
-            onClick = {
-                receivedData.value += "a"
-            }
-        ) {
-            Text("aa")
         }
     }
 
