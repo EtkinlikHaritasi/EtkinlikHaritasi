@@ -13,6 +13,10 @@ import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.database.AppDatabase
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.Event
 import java.text.SimpleDateFormat
 import java.util.Locale
+import android.app.PendingIntent
+import android.content.Intent
+
+
 
 class EventSyncWorker(
     context: Context,
@@ -67,8 +71,6 @@ class EventSyncWorker(
                 }
             }
 
-
-
             Result.success()
         } catch (e: Exception) {
             Log.e("EventSyncWorker", "Exception in doWork", e)
@@ -79,14 +81,35 @@ class EventSyncWorker(
 
     private fun showNotification(message: String) {
         createChannelIfNeeded()
+
+        val intent = applicationContext.packageManager.getLaunchIntentForPackage(applicationContext.packageName)?.apply {
+            flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+        } ?: return  // intent null ise bildirimi gösterme
+
+        val pendingIntentFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_MUTABLE
+        } else {
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT
+        }
+
+        val pendingIntent = android.app.PendingIntent.getActivity(
+            applicationContext,
+            0,
+            intent,
+            pendingIntentFlags
+        )
+
         val notification = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
             .setContentTitle("Etkinlik Güncellemesi")
             .setContentText(message)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
             .build()
-        (applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
-            .notify(2001, notification)
+
+        val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(2001, notification)
     }
 
     private fun createChannelIfNeeded() {
