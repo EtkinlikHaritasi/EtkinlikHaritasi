@@ -104,9 +104,11 @@ class MainActivity : ComponentActivity()
             .build()
         WorkManager.getInstance(context).enqueue(oneTimeRequest)
 
-        val periodicRequest = PeriodicWorkRequestBuilder<EventSyncWorker>(
-            15, TimeUnit.MINUTES
-        ).build()
+
+
+        val periodicRequest = PeriodicWorkRequestBuilder<EventSyncWorker>(15, TimeUnit.MINUTES)
+            .setInputData(inputData)
+            .build()
 
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             "event_sync_worker",
