@@ -197,7 +197,7 @@ class MainActivity : ComponentActivity()
                             }
                         }
                     }
-
+                    scheduleEventWorker(this,loginToken)
 
                 }
                 else
@@ -210,7 +210,6 @@ class MainActivity : ComponentActivity()
                 }
             }
         }
-        scheduleEventWorker(this,loginToken)
     }
 
 

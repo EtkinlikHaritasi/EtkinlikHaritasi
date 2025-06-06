@@ -34,7 +34,7 @@ class EventSyncWorker(
     }
 
     override suspend fun doWork(): Result {
-        Log.d("EventSyncWorker", "Etkinlik senkronizasyonu  başladı")
+        Log.d("EventSyncWorker", "Etkinlik senkronizasyonu başladı")
         return try {
             val token = inputData.getString("LOGIN_TOKEN")
 
