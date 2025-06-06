@@ -23,6 +23,16 @@ class EventRepository(private val eventDao: EventDao) {
             }
         }
     }
+    // Local DB'den tüm etkinlikleri çeker
+    suspend fun getLocalEvents(): List<Event> {
+        return eventDao.getAllEventsList()
+    }
+
+    // Local DB'ye etkinlikleri ekler veya günceller
+    suspend fun insertEvents(events: List<Event>) {
+        eventDao.insertAll(events)
+    }
+
 
     suspend fun getEvents(token: String): List<Event>? {
         return api.getAllEvents(token).body()?.values?.toList()

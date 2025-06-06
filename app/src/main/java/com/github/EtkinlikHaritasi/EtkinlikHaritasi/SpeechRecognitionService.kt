@@ -17,6 +17,12 @@ import com.github.EtkinlikHaritasi.EtkinlikHaritasi.repository.EventRepository
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.database.AppDatabase
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.database.AppDatabaseInstance
 import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.Event
+import android.speech.tts.TextToSpeech
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.localdb.entity.User
+import com.github.EtkinlikHaritasi.EtkinlikHaritasi.remote.auth.TokenManager
+
+
+
 
 class SpeechRecognitionService : Service() {
 
@@ -31,6 +37,9 @@ class SpeechRecognitionService : Service() {
     private lateinit var speechRecognizer: SpeechRecognizer
     private lateinit var speechIntent: Intent
     private lateinit var generativeModel: GenerativeModel
+    private var token: String? = null
+
+
 
     private val anahtarKelimelerListesi =
         listOf("etkinlik", "harita", "sıkıldım", "ne var", "konser", "ara")
@@ -40,6 +49,8 @@ class SpeechRecognitionService : Service() {
     private val serviceJob = SupervisorJob()
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
     private var prevcommand: String = ""
+    private lateinit var textToSpeech: TextToSpeech
+
 
     private val listenReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -65,6 +76,17 @@ class SpeechRecognitionService : Service() {
             stopSelf()
             return
         }
+        textToSpeech = TextToSpeech(applicationContext) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                textToSpeech.language = Locale("tr", "TR")
+                textToSpeech.setSpeechRate(1.5f)
+                textToSpeech.setPitch(1.2f)
+
+            } else {
+                Log.e(TAG, "TextToSpeech başlatılamadı.")
+            }
+        }
+
 
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
         speechRecognizer.setRecognitionListener(recognitionListener)
@@ -78,7 +100,7 @@ class SpeechRecognitionService : Service() {
 
         try {
             val gemini_key = BuildConfig.GEMINI_API_KEY
-            generativeModel = GenerativeModel("gemini-1.5-flash", gemini_key)
+            generativeModel = GenerativeModel("gemini-2.0-flash", gemini_key)
             Log.i(TAG, "Gemini başarıyla başlatıldı.")
         } catch (e: Exception) {
             Log.e(TAG, "Gemini başlatma hatası: ${e.localizedMessage}")
@@ -88,6 +110,10 @@ class SpeechRecognitionService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        token = intent?.getStringExtra("LOGIN_TOKEN")
+        Log.i(TAG, "Servis başlatıldı. Token: $token")
+
+
         Log.i(TAG, "Servis başlatıldı.")
         return START_STICKY
     }
@@ -100,6 +126,10 @@ class SpeechRecognitionService : Service() {
             speechRecognizer.stopListening()
             speechRecognizer.cancel()
             speechRecognizer.destroy()
+            if (::textToSpeech.isInitialized) {
+                textToSpeech.stop()
+                textToSpeech.shutdown()
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Recognizer kapatma hatası: ${e.message}")
         }
@@ -141,15 +171,17 @@ class SpeechRecognitionService : Service() {
     private fun checkKeywordsAndProcessWithGemini(text: String) {
         val repository = getEventRepository()
         serviceScope.launch {
-            val events = listOf<Event>()//repository.getAllEventsList()
+
+            val events = repository.getEvents(token.toString())
+
 
             val eventTitles = events?.joinToString("\n") { it.title } ?: "Etkinlik bulunamadı."
             Log.d(TAG,  eventTitles)
             val prompt = """
-            Kullanıcı şöyle dedi: "$text"
-            kullanıcıya etkinlikler veya aktiviteler öner  kısaca diyalog kurarmısın.
-            İşte mevcut etkinlikler: ve zamanları 
-            $eventTitles
+            Kullanıcı  şöyle dedi: "$text"
+            kullanıcıya etkinlikler veya aktiviteler öner  kısaca  kullanıcıyı ikna et .
+            İşte mevcut etkinlikler: ve zamanları :
+            ${events.toString()}
         """.trimIndent()
 
             prevcommand = text
@@ -159,6 +191,8 @@ class SpeechRecognitionService : Service() {
             if (!reply.isNullOrBlank()) {
                 sendBroadcast(Intent("GEMINI_RESPONSE").putExtra("response", reply))
                 sendBroadcast(Intent("OUTPUT_TEXT").putExtra("output", reply))
+                textToSpeech.speak(reply, TextToSpeech.QUEUE_FLUSH, null, null)
+
             } else {
                 Log.w(TAG, "Gemini cevabı alınamadı.")
             }

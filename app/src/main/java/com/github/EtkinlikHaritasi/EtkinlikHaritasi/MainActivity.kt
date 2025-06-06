@@ -93,16 +93,28 @@ class MainActivity : ComponentActivity()
         }
     }
 
-    fun scheduleEventWorker(context: Context) {
-        Log.d("EventSyncWorker", "Worker başla")
+    fun scheduleEventWorker(context: Context,token: String) {
 
-        val oneTimeRequest = OneTimeWorkRequestBuilder<EventSyncWorker>().build()
+        val prefs = context.getSharedPreferences("prefs", Context.MODE_PRIVATE)
+        prefs.edit().putString("LOGIN_TOKEN", token).apply()
+        Log.d("EventSyncWorker", "Worker başla")
+        val inputData = Data.Builder()
+            .putString("LOGIN_TOKEN", token)
+            .build()
+
+        val oneTimeRequest = OneTimeWorkRequestBuilder<EventSyncWorker>()
+            .setInputData(inputData)
+            .build()
         WorkManager.getInstance(context).enqueue(oneTimeRequest)
 
-        val periodicRequest = PeriodicWorkRequestBuilder<EventSyncWorker>(
-            15, TimeUnit.MINUTES
-        ).build()
 
+        val periodicInputData = Data.Builder()
+            .putString("LOGIN_TOKEN", token)
+            .build()
+
+        val periodicRequest = PeriodicWorkRequestBuilder<EventSyncWorker>(15, TimeUnit.MINUTES)
+            .setInputData(periodicInputData)
+            .build()
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             "event_sync_worker",
             ExistingPeriodicWorkPolicy.KEEP,
@@ -116,7 +128,6 @@ class MainActivity : ComponentActivity()
     {
         val DB = AppDatabaseInstance.getDatabase(this)
 
-        scheduleEventWorker(this)
         fusedLocationProviderClient = LocationUtils.getFusedLocationProviderClient(this)
 
         LocationUtils.checkLocationPermission(this)
@@ -176,7 +187,10 @@ class MainActivity : ComponentActivity()
                             }
                             composable<MikrofonSayfası> {
                                 Mikrofon().İçerik(
-                                    modifier = Modifier.padding(innerPadding)
+                                    modifier = Modifier.padding(innerPadding),
+                                    user = user,
+                                    loginToken = loginToken,
+                                    database = DB
                                 )
                             }
                             composable<KendimSayfası> {
@@ -189,6 +203,8 @@ class MainActivity : ComponentActivity()
                             }
                         }
                     }
+                    scheduleEventWorker(this,loginToken)
+
                 }
                 else
                 {
@@ -254,37 +270,6 @@ fun AltMenü( navController: NavController, modifier: Modifier = Modifier) {
                 }
             }
         )
-
-        var robot = Robot()
-        bu = currentDestination?.hierarchy?.any {it.hasRoute(RobotSayfası::class)} == true
-        NavigationBarItem(
-            icon = {
-                Icon(
-                    if (!bu) robot.kapalıyken_simge else robot.açıkken_simge,
-                    contentDescription = robot.başlık
-                )
-            },
-            label = {
-                Text(robot.başlık)
-            },
-            selected = bu,
-            onClick = {
-                navController.navigate(RobotSayfası) {
-                    // Pop up to the start destination of the graph to
-                    // avoid building up a large stack of destinations
-                    // on the back stack as users select items
-                    popUpTo(navController.graph.findStartDestination().id) {
-                        saveState = true
-                    }
-                    // Avoid multiple copies of the same destination when
-                    // reselecting the same item
-                    launchSingleTop = true
-                    // Restore state when reselecting a previously selected item
-                    restoreState = true
-                }
-            }
-        )
-
         var bilet = Bilet()
         bu = currentDestination?.hierarchy?.any {it.hasRoute(BiletSayfası::class)} == true
         NavigationBarItem(

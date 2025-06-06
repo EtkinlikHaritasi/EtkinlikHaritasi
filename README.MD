@@ -93,6 +93,8 @@ proje ödevi olarak geliştirilmektedir.
 4. Hafta: Etkinliğe kalan süre bildirimi ve etkinlik müşteri hizmetlerinde veri tabanındaki
     etkinliklere göre öneri yapma eklendi.
 
+5. Hafta: Hatalar giderildi.
+
 ### Sensor (Motion / Location / Environment)
 
 1. Hafta: GPS verisi okuma işlemi bir butona bağlanarak yapıldı.
@@ -122,3 +124,5 @@ proje ödevi olarak geliştirilmektedir.
 
 2. Hafta: Gemini entegrasyonuna başlandı.  
     Arka planda sürekli mikrofon dinlemesi yapılıyor.
+
+5. Hafta: Hatalar giderildi.
